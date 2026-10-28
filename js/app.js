@@ -268,11 +268,11 @@ function renderLatihan(el,sub){
     <h1>Asah sampai refleks.</h1>
     <p class="lead">Kerjakan soal sebanyak mungkin. Jawaban salah tercatat otomatis, jadi nanti bisa diulang khusus yang salah saja.</p>
   </div>
-  <nav class="seg" aria-label="Jenis latihan">
-    <a href="#latihan/soal" ${sub==="soal"?'aria-current="page"':""}>✍️ Bank Soal</a>
-    <a href="#latihan/hitung" ${sub==="hitung"?'aria-current="page"':""}>🧮 Hitung Acak</a>
-    <a href="#latihan/flash" ${sub==="flash"?'aria-current="page"':""}>🃏 Flashcard</a>
-    <a href="#latihan/konv" ${sub==="konv"?'aria-current="page"':""}>🔁 Konverter</a>
+  <nav class="seg tabs4" aria-label="Jenis latihan">
+    <a href="#latihan/soal" ${sub==="soal"?'aria-current="page"':""}><span class="si">✍️</span>Bank Soal</a>
+    <a href="#latihan/hitung" ${sub==="hitung"?'aria-current="page"':""}><span class="si">🧮</span>Hitung Acak</a>
+    <a href="#latihan/flash" ${sub==="flash"?'aria-current="page"':""}><span class="si">🃏</span>Flashcard</a>
+    <a href="#latihan/konv" ${sub==="konv"?'aria-current="page"':""}><span class="si">🔁</span>Konverter</a>
   </nav>
   <div id="latbody" style="margin-top:20px"></div>`;
   const body=$("#latbody",el);
@@ -415,7 +415,7 @@ function renderGen(body){
     const ok=norm(inp.value,c.num)===norm(c.ans,c.num);
     G.checked=true;G.done++;if(ok){G.ok++;G.streak++;}else G.streak=0;
     inp.classList.add(ok?"ok":"no");inp.readOnly=true;$("#gcheck",body).textContent="Soal baru →";
-    reveal(ok);
+    reveal(ok);$(".card .fnext",body).hidden=true;
     $$(".fstat",body)[0].innerHTML=`<b>🔥 ${G.streak}</b>beruntun`;$$(".fstat",body)[1].innerHTML=`<b>${G.ok}</b>/ ${G.done} benar`;
     if(ok&&G.streak===5){confetti();toast("5× benar beruntun! Kamu sudah jago 🔥");}
   });
@@ -549,7 +549,7 @@ function simExam(el){
         <div class="qt">${q.q}</div>
         <div class="opts">${q.o.map((o,j)=>`<button class="opt ${SIM.ans[i]===j?"sel":""}" data-j="${j}"><span class="mk">${"ABCDE"[j]}</span><span class="ot">${esc(o)}</span></button>`).join("")}</div>
       </div>
-      <div class="fnext">
+      <div class="fnext examnav">
         <button class="btn" id="sprev" ${i===0?"disabled":""}>← Sebelumnya</button>
         <button class="btn soft" id="sflag">${SIM.flag[i]?"Hapus tanda":"🚩 Tandai ragu"}</button>
         <button class="btn primary" id="snext">${i===n-1?"Selesai? Kumpulkan":"Berikutnya →"}</button>
@@ -564,7 +564,7 @@ function simExam(el){
       <button class="btn sm ghost" id="squit" style="margin-top:6px;padding-left:0">✕ Batalkan simulasi</button>
     </aside>
   </div>`;
-  const go=k=>{SIM.cur=Math.max(0,Math.min(n-1,k));simExam(el);};
+  const go=k=>{SIM.cur=Math.max(0,Math.min(n-1,k));simExam(el);if(window.scrollY>80)window.scrollTo(0,0);};
   SIM.go=go;SIM.pickOpt=j=>{if(j<q.o.length){SIM.ans[i]=j;simExam(el);}};
   $$(".opt",el).forEach(b=>b.addEventListener("click",()=>SIM.pickOpt(+b.dataset.j)));
   $$("[data-k]",el).forEach(b=>b.addEventListener("click",()=>go(+b.dataset.k)));

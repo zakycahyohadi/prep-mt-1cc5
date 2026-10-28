@@ -189,13 +189,13 @@ var ADS_TOPICS=[
   <pre class="code"><span class="cm">// pustaka input-output</span>
 #include &lt;stdio.h&gt;
 <span class="kw">int</span> <span class="fn">main</span>(<span class="kw">void</span>) {
-    <span class="fn">printf</span>(<span class="st">"Halo, Dunia!\n"</span>);
+    <span class="fn">printf</span>(<span class="st">"Halo, Dunia!\\n"</span>);
     <span class="kw">return</span> 0;   <span class="cm">// 0 = selesai sukses</span>
 }</pre>
   <ul>
    <li><span class="inlinecode">#include &lt;stdio.h&gt;</span> memuat pustaka I/O agar <span class="inlinecode">printf</span> bisa dipakai.</li>
    <li>Eksekusi mulai dari fungsi <span class="inlinecode">main()</span>. Tiap pernyataan diakhiri titik koma <span class="inlinecode">;</span>.</li>
-   <li><span class="inlinecode">\n</span> = baris baru. Kompilasi: <span class="inlinecode">gcc -Wall -Wextra -std=c11 hello.c -o hello</span>.</li>
+   <li><span class="inlinecode">\\n</span> = baris baru. Kompilasi: <span class="inlinecode">gcc -Wall -Wextra -std=c11 hello.c -o hello</span>.</li>
   </ul>`},
 
  {t:"Modul 2 — Variabel, Tipe Data & Konstanta", k:["char 1B %c · int 4B %d · float 4B %f · double 8B %lf · long long 8B %lld", "Nama variabel: awali huruf/_, tanpa spasi, case-sensitive, bukan keyword", "Desimal disimpan ke int → pecahan dibuang", "<code>const</code> bertipe · <code>#define</code> makro tanpa tipe"], h:`
@@ -374,8 +374,8 @@ var ADS_BEDAH=[
   </ul>`},
  {t:"Soal 4 — Analisis Output & Trace (20 poin)", h:`
   <pre class="code"><span class="kw">for</span> (i = 1; i &lt;= 10; i += 2) {
-    <span class="kw">if</span> (i % 3 == 0) <span class="fn">printf</span>(<span class="st">"%d habis dibagi 3\n"</span>, i);
-    <span class="kw">else</span>           <span class="fn">printf</span>(<span class="st">"%d\n"</span>, i);
+    <span class="kw">if</span> (i % 3 == 0) <span class="fn">printf</span>(<span class="st">"%d habis dibagi 3\\n"</span>, i);
+    <span class="kw">else</span>           <span class="fn">printf</span>(<span class="st">"%d\\n"</span>, i);
     jumlah += i;
 }</pre>
   <div class="tblwrap"><table class="tbl"><tr><th>Putaran</th><th>i</th><th>i%3</th><th>Cabang</th><th>jumlah</th></tr>

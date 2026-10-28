@@ -74,7 +74,7 @@ function confetti(){
   if(reduceMotion)return;
   const box=document.createElement("div");box.className="confetti";
   const cols=["#5b54e8","#7c3aed","#e11d48","#0d9488","#d97706","#16a34a"];
-  for(let i=0;i<90;i++){
+  for(let i=0,n=innerWidth<700?40:90;i<n;i++){
     const p=document.createElement("i");
     p.style.left=Math.random()*100+"vw";p.style.background=pick(cols);
     p.style.setProperty("--dx",(Math.random()*160-80)+"px");p.style.setProperty("--rot",(Math.random()*720-360)+"deg");

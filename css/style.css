@@ -482,6 +482,13 @@ input.txt.no{border-color:var(--bad);background:var(--bad-soft)}
 
 
 /* ---------- HP: penyesuaian khusus layar sentuh & sempit ---------- */
+/* HP: blur kaca diganti latar solid, karena backdrop-filter berat untuk GPU HP murah */
+@media(max-width:860px){
+  header.top{backdrop-filter:none;-webkit-backdrop-filter:none;background:var(--bg)}
+  nav.bottom{backdrop-filter:none;-webkit-backdrop-filter:none;background:var(--surface)}
+  .examtop{backdrop-filter:none;-webkit-backdrop-filter:none;background:var(--bg)}
+  .card,.q,.note,pre.work,.formula div{box-shadow:none}
+}
 @media(hover:none){.kbd{display:none!important}}
 @media(max-width:760px){
   select{font-size:16px;flex:1 1 150px}

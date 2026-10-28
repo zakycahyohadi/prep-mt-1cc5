@@ -13,6 +13,7 @@ Website belajar **Modul Test (MT)** kelas 1CC5, step by step, untuk dua mata kul
 - 🃏 **Flashcard** dan 🔁 **Konverter** desimal ↔ biner ↔ oktal ↔ heksa.
 - ⚡ **Ringkasan Kilat**: semua inti dan rumus dalam satu halaman (bisa dicetak/PDF), plus ✅ **Kisi-kisi** yang bisa disalin ke WhatsApp.
 - Mode gelap/terang, nyaman di HP (ada navigasi bawah). Progres tersimpan otomatis di browser.
+- Ringan untuk HP kentang (±66 KB gzip) dan **bisa offline** setelah sekali dibuka. Bisa dipasang lewat "Add to Home Screen".
 
 Materi disusun dari slide & modul dosen (Pak Reza) + quiz HOTS resmi.
 
@@ -22,6 +23,7 @@ index.html      kerangka halaman
 css/style.css   tampilan
 js/data.js      SEMUA konten: materi, soal, flashcard, cara ngitung, kisi-kisi
 js/app.js       logika (router, progres, latihan, simulasi)
+sw.js           cache offline (naikkan VERSION kalau ada update besar)
 ```
 Mau menambah soal? Tambahkan objek baru ke `QUIZ_IIT` / `QUIZ_ADS` di `js/data.js`:
 `{q:"pertanyaan", o:["A","B","C","D"], a:indeksJawabanBenar, e:"pembahasan", t:indeksTopik}`.

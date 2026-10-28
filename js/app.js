@@ -20,7 +20,7 @@ const fresh=()=>({done:{},q:{},sims:[]});
 let S=fresh();
 try{Object.assign(S,JSON.parse(localStorage.getItem(KEY)||"{}"));}catch(e){}
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}};
-function record(key,ok){S.q[key]=ok?1:0;save();}
+function record(key,ok){if(key.startsWith("g-"))return;S.q[key]=ok?1:0;save();}
 
 /* ================= model ================= */
 const SUBJ={
@@ -32,6 +32,21 @@ for(const k in SUBJ)SUBJ[k].bank.forEach((q,i)=>ALLQ.push(Object.assign({},q,{su
 const qOfTopic=(subj,t)=>ALLQ.filter(q=>q.subj===subj&&q.t===t);
 const CHECK_N=8; // soal cek pemahaman per langkah; sisanya lewat Bank Soal
 const checkN=(subj,t)=>Math.min(CHECK_N,qOfTopic(subj,t).length);
+
+/* Jenis & bobot soal statis: hitungan IIT / kode ADS = 2 poin, multi-langkah = 3, konsep = 1. */
+const CALC_RE=/[₀-₉]|biner|desimal|heksa|oktal|komplemen|BCD|detik|efisiensi|pernyataan tunggal|\d{3,}/i;
+const HEAVY_RE=/BCD|18 − 7|bps|fisiensi|switch\(|Tugas 80|umur 3\/10|Berapa elemen|habis dibagi 3/;
+ALLQ.forEach(q=>{
+  q.kind=q.subj==="iit"?(CALC_RE.test(q.q)?"calc":"konsep"):(/<code>|printf|scanf|for\(/.test(q.q)?"code":"konsep");
+  q.w=q.w||(HEAVY_RE.test(q.q)?3:q.kind==="konsep"?1:2);
+});
+const KINDS={all:"Semua jenis",calc:"🧮 Hitungan (IIT)",code:"💻 Kode & output (ADS)",konsep:"📖 Konsep & hafalan"};
+
+/* Soal acak dari soalgen.js (tanpa batas). Tidak dicatat di riwayat "pernah salah". */
+const GENS={iit:GENQ.iit.map(g=>Object.assign({subj:"iit",kind:"calc"},g)),ads:GENQ.ads.map(g=>Object.assign({subj:"ads",kind:"code"},g))};
+let gseq=0;
+function genQ(g){const r=g.make();return Object.assign({subj:g.subj,t:g.t,kind:g.kind},r,{w:r.w||g.w,gen:g.id,key:"g-"+g.id+"-"+(++gseq)});}
+function genMany(list,n){const out=[];let bag=[];while(out.length<n&&list.length){if(!bag.length)bag=shuffle(list);out.push(genQ(bag.pop()));}return out;}
 
 const HITUNG_GEN=["dec2bin","bin2dec","bin2oct","dec2hex","hex2dec","binadd","comp2","comp2",null,null,"download",null,null,null];
 const STAGES=[
@@ -95,7 +110,7 @@ function questionCard(q,opt){
   const el=document.createElement("div");el.className="q "+SUBJ[q.subj].cls;
   const perm=shuffle(q.o.map((_,i)=>i));
   const prev=q.key in S.q?(S.q[q.key]?`<span class="mast hi">pernah benar</span>`:`<span class="mast lo">pernah salah</span>`):"";
-  el.innerHTML=`<div class="qmeta">${opt.num?`<span class="qn">SOAL ${pad(opt.num)}</span>`:""}${opt.showSubj?`<span class="chip">${SUBJ[q.subj].short} · ${esc(topic)}</span>`:""}${opt.showPrev?prev:""}</div>
+  el.innerHTML=`<div class="qmeta">${opt.num?`<span class="qn">SOAL ${pad(opt.num)}</span>`:""}${opt.showSubj?`<span class="chip">${SUBJ[q.subj].short} · ${esc(topic)}</span>`:""}<span class="mast" title="Bobot soal">${"⭐".repeat(q.w)} ${q.w} poin</span>${q.gen?'<span class="mast">🎲 soal acak</span>':""}${opt.showPrev?prev:""}</div>
     <div class="qt">${q.q}</div>
     <div class="opts">${perm.map((oi,i)=>`<button class="opt" data-i="${i}"><span class="mk">${"ABCDE"[i]}</span><span class="ot">${esc(q.o[oi])}</span></button>`).join("")}</div>`;
   const btns=$$(".opt",el);let answered=false;
@@ -170,7 +185,7 @@ function renderHome(el){
 
   <div class="sectiontitle"><div><div class="eyebrow">Alat bantu</div><h2>Latihan bebas</h2></div></div>
   <div class="quick">
-    <a class="card qk s-acc" href="#latihan/soal"><span class="ic">✍️</span><div><b>Bank Soal</b><span>${ALLQ.length} soal + pembahasan. Bisa ulangi yang salah saja.</span></div></a>
+    <a class="card qk s-acc" href="#latihan/soal"><span class="ic">✍️</span><div><b>Bank Soal</b><span>${ALLQ.length} soal + soal hitung &amp; kode acak tanpa batas.</span></div></a>
     <a class="card qk s-hitung" href="#latihan/hitung"><span class="ic">🧮</span><div><b>Hitung Acak</b><span>Soal konversi & komplemen-2 tanpa batas, lengkap dengan caranya.</span></div></a>
     <a class="card qk s-ads" href="#latihan/flash"><span class="ic">🃏</span><div><b>Flashcard</b><span>${FLASHCARDS.length} kartu hafalan cepat IIT + ADS.</span></div></a>
     <a class="card qk s-iit" href="#latihan/konv"><span class="ic">🔁</span><div><b>Konverter</b><span>Desimal ↔ biner ↔ oktal ↔ heksa buat cek jawaban.</span></div></a>
@@ -257,9 +272,12 @@ function renderLesson(el,id){
 }
 
 /* ================= LATIHAN ================= */
-const P={subj:"all",topic:-1,onlyWrong:false,queue:null,pos:0,ok:0,done:0,streak:0,best:0,wrongs:[],card:null};
+const P={subj:"all",topic:-1,kind:"all",onlyWrong:false,queue:null,pos:0,ok:0,done:0,streak:0,best:0,wrongs:[],card:null};
 function pool(){
-  return ALLQ.filter(q=>(P.subj==="all"||q.subj===P.subj)&&(P.topic<0||q.t===P.topic)&&(!P.onlyWrong||S.q[q.key]===0));
+  const st=ALLQ.filter(q=>(P.subj==="all"||q.subj===P.subj)&&(P.topic<0||q.t===P.topic)&&(P.kind==="all"||q.kind===P.kind)&&(!P.onlyWrong||S.q[q.key]===0));
+  if(P.onlyWrong||P.kind==="konsep")return st;
+  const gl=[].concat(P.subj!=="ads"?GENS.iit:[],P.subj!=="iit"?GENS.ads:[]).filter(g=>(P.topic<0||g.t===P.topic)&&(P.kind==="all"||g.kind===P.kind));
+  return st.concat(genMany(gl,gl.length?Math.min(40,Math.max(15,gl.length*2)):0));
 }
 function newQueue(list){P.queue=shuffle(list||pool());P.pos=0;P.ok=0;P.done=0;P.streak=0;P.wrongs=[];}
 
@@ -291,6 +309,7 @@ function renderBank(body){
     <div class="toolbar">
       <select id="bsubj" aria-label="Mata kuliah"><option value="all">Semua mapel</option><option value="iit">IIT</option><option value="ads">ADS</option></select>
       <select id="btopic" aria-label="Topik" ${P.subj==="all"?"disabled":""}><option value="-1">Semua topik</option>${topics.map((t,i)=>`<option value="${i}">${i+1}. ${esc(t.t)}</option>`).join("")}</select>
+      <select id="bkind" aria-label="Jenis soal">${Object.entries(KINDS).map(([k,l])=>`<option value="${k}">${l}</option>`).join("")}</select>
       <label class="toggle"><input type="checkbox" id="bwrong" ${P.onlyWrong?"checked":""}> Hanya yang pernah salah (${wrongN})</label>
       <button class="btn sm ghost" id="bshuf">↻ Acak ulang</button>
     </div>
@@ -298,7 +317,8 @@ function renderBank(body){
     <div class="bar" style="margin-bottom:16px"><i id="bfill"></i></div>
     <div id="bcard"></div>
   </div>`;
-  $("#bsubj",body).value=P.subj;$("#btopic",body).value=String(P.topic);
+  $("#bsubj",body).value=P.subj;$("#btopic",body).value=String(P.topic);$("#bkind",body).value=P.kind;
+  $("#bkind",body).addEventListener("change",e=>{P.kind=e.target.value;newQueue();renderBank(body);});
   $("#bsubj",body).addEventListener("change",e=>{P.subj=e.target.value;P.topic=-1;newQueue();renderBank(body);});
   $("#btopic",body).addEventListener("change",e=>{P.topic=+e.target.value;newQueue();renderBank(body);});
   $("#bwrong",body).addEventListener("change",e=>{P.onlyWrong=e.target.checked;newQueue();renderBank(body);});
@@ -488,27 +508,33 @@ function renderConv(body){
 
 /* ================= SIMULASI ================= */
 const PACKS=[
-  {id:"iit",name:"MT IIT",ic:"💡",cls:"s-iit",n:30,min:45,desc:"30 soal seperti MT Introduction to IT, diambil merata dari ketujuh topik."},
-  {id:"ads",name:"MT ADS",ic:"🧩",cls:"s-ads",n:30,min:45,desc:"30 soal seperti MT Algorithm & Data Structure, diambil merata dari 12 topik."},
+  {id:"iit",name:"MT IIT",ic:"💡",cls:"s-iit",n:30,min:45,desc:"30 soal: 18 hitungan (konversi, komplemen, BCD, logika, data) + 12 konsep dari ketujuh topik."},
+  {id:"ads",name:"MT ADS",ic:"🧩",cls:"s-ads",n:30,min:45,desc:"30 soal: 18 baca kode & tebak output + 12 konsep dari 12 topik."},
   {id:"mix",name:"Full MT (IIT + ADS)",ic:"🔥",cls:"s-bedah",n:60,min:90,desc:"30 IIT + 30 ADS sekaligus. Latihan ketahanan paling mirip hari H."}
 ];
 let SIM=null,simTick=null;
 function startSim(id){
   const p=PACKS.find(x=>x.id===id);
-  const items=id==="mix"?take("iit",30).concat(take("ads",30)):take(id,p.n);
+  const items=id==="mix"?simItems("iit").concat(simItems("ads")):simItems(id);
   SIM={pack:p,items,perm:items.map(q=>shuffle(q.o.map((_,i)=>i))),ans:items.map(()=>null),flag:items.map(()=>false),cur:0,start:Date.now(),end:Date.now()+p.min*60000,done:false,filter:"wrong"};
   clearInterval(simTick);simTick=setInterval(tickSim,1000);
 }
 /* Ambil n soal merata per topik (proporsional dengan jumlah soal tiap topik), urutan topik tetap. */
-function take(subj,n){
-  const by=SUBJ[subj].topics.map((_,t)=>shuffle(qOfTopic(subj,t)));
+function take(subj,n,filter){
+  const by=SUBJ[subj].topics.map((_,t)=>shuffle(qOfTopic(subj,t).filter(filter||(()=>true))));
   const tot=by.reduce((a,b)=>a+b.length,0);
-  const floor=n>=by.length*2?2:1; // tiap topik minimal muncul 2 soal kalau kuotanya cukup
+  const floor=n>=by.filter(b=>b.length).length*2?2:1; // tiap topik minimal muncul 2 soal kalau kuotanya cukup
   const alloc=by.map(b=>Math.min(b.length,Math.max(floor,Math.floor(n*b.length/tot))));
   let left=n-alloc.reduce((a,b)=>a+b,0);
   while(left<0){const t=alloc.indexOf(Math.max(...alloc));alloc[t]--;left++;}
   for(const t of shuffle(by.map((_,i)=>i)))if(left>0&&alloc[t]<by[t].length){alloc[t]++;left--;}
   return by.flatMap((b,t)=>shuffle(b.slice(0,alloc[t])));
+}
+/* Komposisi paket MT: IIT berat hitungan, ADS berat kode → output. */
+function simItems(subj){
+  if(subj==="iit")return shuffle(genMany(GENS.iit,18).concat(take("iit",12,q=>q.kind!=="calc")));
+  const sc=shuffle(ALLQ.filter(q=>q.subj==="ads"&&q.kind==="code")).slice(0,6);
+  return shuffle(genMany(GENS.ads,12).concat(sc,take("ads",12,q=>q.kind!=="code")));
 }
 function tickSim(){
   if(!SIM||SIM.done){clearInterval(simTick);return;}
@@ -519,9 +545,10 @@ function tickSim(){
 function finishSim(){
   if(!SIM||SIM.done)return;
   clearInterval(simTick);
-  let ok=0;SIM.items.forEach((q,i)=>{if(SIM.ans[i]!==null){const c=SIM.ans[i]===q.a;if(c)ok++;record(q.key,c);}});
-  const n=SIM.items.length,pct=Math.round(ok/n*100),secs=Math.round((Math.min(Date.now(),SIM.end)-SIM.start)/1000);
-  SIM.done=true;SIM.res={ok,n,pct,secs};
+  let ok=0,pts=0,max=0;
+  SIM.items.forEach((q,i)=>{max+=q.w;if(SIM.ans[i]!==null){const c=SIM.ans[i]===q.a;if(c){ok++;pts+=q.w;}record(q.key,c);}});
+  const n=SIM.items.length,pct=Math.round(pts/max*100),secs=Math.round((Math.min(Date.now(),SIM.end)-SIM.start)/1000);
+  SIM.done=true;SIM.res={ok,n,pct,secs,pts,max};
   S.sims.unshift({d:Date.now(),p:SIM.pack.id,ok,n,pct,secs});S.sims=S.sims.slice(0,12);save();
   if(pct>=80)setTimeout(confetti,200);
   if(location.hash.startsWith("#simulasi"))renderSim($("#view-simulasi"));
@@ -538,6 +565,7 @@ function simSetup(el){
     <div class="eyebrow">Simulasi MT</div>
     <h1>Uji diri kayak ujian beneran.</h1>
     <p class="lead">Soal diacak dan ada timer. Pembahasan baru muncul setelah jawaban dikumpulkan. Jawaban masih bisa diganti, dan soal yang ragu bisa ditandai 🚩.</p>
+    <p class="muted" style="margin-top:10px;font-size:14px"><b>Bobot nilai beda per soal:</b> ⭐ 1 poin konsep/hafalan · ⭐⭐ 2 poin hitung/trace sederhana · ⭐⭐⭐ 3 poin multi-langkah. Nilai akhir = poin yang didapat ÷ total poin × 100. Soal hitungan & kode dibuat acak, jadi tiap simulasi beda.</p>
   </div>
   <div class="packs">${PACKS.map(p=>`<button class="card pack ${p.cls}" data-pack="${p.id}"><span class="ic">${p.ic}</span><h3>${p.name}</h3><p>${p.desc}</p><div class="row"><span class="chip">${p.n} soal</span><span class="chip">${p.min} menit</span></div></button>`).join("")}</div>
   <div class="sectiontitle"><div><div class="eyebrow">Riwayat</div><h2>Percobaan sebelumnya</h2></div></div>
@@ -558,7 +586,7 @@ function simExam(el){
   <div class="exam">
     <div>
       <div class="q ${SUBJ[q.subj].cls}">
-        <div class="qmeta"><span class="qn">SOAL ${i+1} DARI ${n}</span><span class="chip">${SUBJ[q.subj].short}</span>${SIM.flag[i]?'<span class="mast mid">🚩 ragu</span>':""}</div>
+        <div class="qmeta"><span class="qn">SOAL ${i+1} DARI ${n}</span><span class="chip">${SUBJ[q.subj].short}</span><span class="mast">${"⭐".repeat(q.w)} ${q.w} poin</span>${SIM.flag[i]?'<span class="mast mid">🚩 ragu</span>':""}</div>
         <div class="qt">${q.q}</div>
         <div class="opts">${SIM.perm[i].map((oi,j)=>`<button class="opt ${SIM.ans[i]===oi?"sel":""}" data-j="${j}"><span class="mk">${"ABCDE"[j]}</span><span class="ot">${esc(q.o[oi])}</span></button>`).join("")}</div>
       </div>
@@ -605,7 +633,7 @@ function simResult(el){
     <div>
       <div class="eyebrow">Hasil simulasi · ${p.name}</div>
       <h2 style="font-size:clamp(22px,4vw,30px);font-weight:800;margin:6px 0 6px">${msg}</h2>
-      <p class="muted">${r.ok} dari ${r.n} benar · waktu ${mmss(r.secs)} · ${SIM.ans.filter(a=>a===null).length} tidak dijawab</p>
+      <p class="muted"><b>${r.pts}/${r.max} poin</b> · ${r.ok} dari ${r.n} soal benar · waktu ${mmss(r.secs)} · ${SIM.ans.filter(a=>a===null).length} tidak dijawab</p>
       <div class="row" style="margin-top:16px"><button class="btn primary" id="sagain">↻ Simulasi baru</button>${wrongIdx.length?`<a class="btn" href="#latihan/soal" id="sdrill">✍️ Latih ulang yang salah</a>`:""}</div>
     </div>
   </div>
@@ -617,7 +645,7 @@ function simResult(el){
   <div class="qlist">${SIM.items.map((q,i)=>{
     if(SIM.filter==="wrong"&&SIM.ans[i]===q.a)return "";
     const a=SIM.ans[i],ok=a===q.a;
-    return `<div class="q ${SUBJ[q.subj].cls}"><div class="qmeta"><span class="qn">SOAL ${i+1}</span><span class="chip">${SUBJ[q.subj].short} · ${esc(SUBJ[q.subj].topics[q.t].t)}</span>${a===null?'<span class="mast">tidak dijawab</span>':ok?'<span class="mast hi">benar</span>':'<span class="mast lo">salah</span>'}</div>
+    return `<div class="q ${SUBJ[q.subj].cls}"><div class="qmeta"><span class="qn">SOAL ${i+1}</span><span class="chip">${SUBJ[q.subj].short} · ${esc(SUBJ[q.subj].topics[q.t].t)}</span><span class="mast">${q.w} poin</span>${a===null?'<span class="mast">tidak dijawab</span>':ok?'<span class="mast hi">benar</span>':'<span class="mast lo">salah</span>'}</div>
       <div class="qt">${q.q}</div>
       <div class="opts">${SIM.perm[i].map((oi,j)=>`<button class="opt ${oi===q.a?"correct":oi===a?"wrong":"dim"}" disabled><span class="mk">${"ABCDE"[j]}</span><span class="ot">${esc(q.o[oi])}</span></button>`).join("")}</div>
       <div class="exp ${ok?"ok":"no"}">${esc(q.e)}<br><a href="#l/${q.subj}-${q.t}">📖 Baca materinya →</a></div></div>`;

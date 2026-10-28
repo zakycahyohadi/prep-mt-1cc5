@@ -7,8 +7,8 @@ Website belajar **Modul Test (MT)** kelas 1CC5, step by step, untuk dua mata kul
 
 ## Fitur
 - 🧭 **Jalur Belajar**: 38 langkah dalam 5 tahap (IIT → Lab Hitung → ADS → Bedah Soal HOTS → Simulasi). Tiap langkah punya kotak *Inti yang wajib nempel*, materi lengkap, dan *Cek Pemahaman*.
-- ✍️ **Bank Soal**: 214 soal dengan pembahasan (urutan opsi diacak tiap muncul), filter per mapel/topik, mode "hanya yang pernah salah", plus shortcut keyboard.
-- ⏱️ **Simulasi MT**: format MT: 30 soal IIT, 30 soal ADS, atau Full 60 soal, pakai timer. Soal diambil merata per topik. Ada analisis skor per topik dan pembahasan.
+- ✍️ **Bank Soal**: 214 soal tetap + **soal acak tanpa batas** (25 generator hitungan IIT, 27 generator "kode C → output" ADS). Filter per mapel/topik/jenis, mode "hanya yang pernah salah", opsi diacak, shortcut keyboard.
+- ⏱️ **Simulasi MT**: format MT: 30 soal IIT (18 hitungan + 12 konsep), 30 soal ADS (18 kode/output + 12 konsep), atau Full 60 soal, pakai timer. **Bobot nilai beda per soal** (1–3 poin sesuai effort). Ada analisis skor per topik dan pembahasan.
 - 🧮 **Hitung Acak**: soal konversi basis, komplemen-2, penjumlahan biner, dan waktu unduh tanpa batas, lengkap dengan langkah-langkahnya.
 - 🃏 **Flashcard** dan 🔁 **Konverter** desimal ↔ biner ↔ oktal ↔ heksa.
 - ⚡ **Ringkasan Kilat**: semua inti dan rumus dalam satu halaman (bisa dicetak/PDF), plus ✅ **Kisi-kisi** yang bisa disalin ke WhatsApp.
@@ -22,6 +22,7 @@ Materi disusun dari slide & modul dosen (Pak Reza) + quiz HOTS resmi.
 index.html      kerangka halaman
 css/style.css   tampilan
 js/data.js      SEMUA konten: materi, soal, flashcard, cara ngitung, kisi-kisi
+js/soalgen.js   generator soal acak (jawaban kode C sudah diverifikasi dengan compiler)
 js/app.js       logika (router, progres, latihan, simulasi)
 sw.js           cache offline (naikkan VERSION kalau ada update besar)
 ```

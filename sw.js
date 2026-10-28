@@ -1,8 +1,8 @@
 /* Service worker: simpan semua file supaya web tetap bisa dibuka tanpa sinyal.
    Strategi stale-while-revalidate: tampilkan versi tersimpan (cepat), lalu ambil versi terbaru di belakang layar.
    Naikkan VERSION setiap kali ada perubahan besar supaya cache lama dibuang. */
-const VERSION = "prepmt-v4";
-const CORE = ["./", "index.html", "css/style.css", "js/data.js", "js/app.js", "icon.svg", "manifest.webmanifest"];
+const VERSION = "prepmt-v5";
+const CORE = ["./", "index.html", "css/style.css", "js/data.js", "js/soalgen.js", "js/app.js", "icon.svg", "manifest.webmanifest"];
 
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(VERSION).then(c => c.addAll(CORE)).then(() => self.skipWaiting()));

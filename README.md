@@ -7,8 +7,8 @@ Website belajar **Modul Test (MT)** kelas 1CC5, step by step, untuk dua mata kul
 
 ## Fitur
 - 🧭 **Jalur Belajar**: 38 langkah dalam 5 tahap (IIT → Lab Hitung → ADS → Bedah Soal HOTS → Simulasi). Tiap langkah punya kotak *Inti yang wajib nempel*, materi lengkap, dan *Cek Pemahaman*.
-- ✍️ **Bank Soal**: 86 soal dengan pembahasan, filter per mapel/topik, mode "hanya yang pernah salah", plus shortcut keyboard.
-- ⏱️ **Simulasi MT**: soal acak dengan timer (paket IIT, ADS, atau campuran). Ada analisis skor per topik dan pembahasan.
+- ✍️ **Bank Soal**: 214 soal dengan pembahasan (urutan opsi diacak tiap muncul), filter per mapel/topik, mode "hanya yang pernah salah", plus shortcut keyboard.
+- ⏱️ **Simulasi MT**: format MT: 30 soal IIT, 30 soal ADS, atau Full 60 soal, pakai timer. Soal diambil merata per topik. Ada analisis skor per topik dan pembahasan.
 - 🧮 **Hitung Acak**: soal konversi basis, komplemen-2, penjumlahan biner, dan waktu unduh tanpa batas, lengkap dengan langkah-langkahnya.
 - 🃏 **Flashcard** dan 🔁 **Konverter** desimal ↔ biner ↔ oktal ↔ heksa.
 - ⚡ **Ringkasan Kilat**: semua inti dan rumus dalam satu halaman (bisa dicetak/PDF), plus ✅ **Kisi-kisi** yang bisa disalin ke WhatsApp.

@@ -30,6 +30,8 @@ const SUBJ={
 const ALLQ=[];
 for(const k in SUBJ)SUBJ[k].bank.forEach((q,i)=>ALLQ.push(Object.assign({},q,{subj:k,key:k+"-"+i})));
 const qOfTopic=(subj,t)=>ALLQ.filter(q=>q.subj===subj&&q.t===t);
+const CHECK_N=8; // soal cek pemahaman per langkah; sisanya lewat Bank Soal
+const checkN=(subj,t)=>Math.min(CHECK_N,qOfTopic(subj,t).length);
 
 const HITUNG_GEN=["dec2bin","bin2dec","bin2oct","dec2hex","hex2dec","binadd","comp2","comp2",null,null,"download",null,null,null];
 const STAGES=[
@@ -91,15 +93,16 @@ function questionCard(q,opt){
   opt=opt||{};
   const topic=SUBJ[q.subj].topics[q.t].t;
   const el=document.createElement("div");el.className="q "+SUBJ[q.subj].cls;
+  const perm=shuffle(q.o.map((_,i)=>i));
   const prev=q.key in S.q?(S.q[q.key]?`<span class="mast hi">pernah benar</span>`:`<span class="mast lo">pernah salah</span>`):"";
   el.innerHTML=`<div class="qmeta">${opt.num?`<span class="qn">SOAL ${pad(opt.num)}</span>`:""}${opt.showSubj?`<span class="chip">${SUBJ[q.subj].short} · ${esc(topic)}</span>`:""}${opt.showPrev?prev:""}</div>
     <div class="qt">${q.q}</div>
-    <div class="opts">${q.o.map((o,i)=>`<button class="opt" data-i="${i}"><span class="mk">${"ABCDE"[i]}</span><span class="ot">${esc(o)}</span></button>`).join("")}</div>`;
+    <div class="opts">${perm.map((oi,i)=>`<button class="opt" data-i="${i}"><span class="mk">${"ABCDE"[i]}</span><span class="ot">${esc(q.o[oi])}</span></button>`).join("")}</div>`;
   const btns=$$(".opt",el);let answered=false;
   function choose(i){
     if(answered||i<0||i>=q.o.length)return;
-    answered=true;const ok=i===q.a;record(q.key,ok);
-    btns.forEach((b,j)=>{b.disabled=true;if(j===q.a)b.classList.add("correct");else if(j===i)b.classList.add("wrong");else b.classList.add("dim");});
+    answered=true;const ok=perm[i]===q.a;record(q.key,ok);
+    btns.forEach((b,j)=>{b.disabled=true;if(perm[j]===q.a)b.classList.add("correct");else if(j===i)b.classList.add("wrong");else b.classList.add("dim");});
     el.classList.add(ok?"pop":"shake");
     const ex=document.createElement("div");ex.className="exp "+(ok?"ok":"no");
     ex.innerHTML=`<b>${ok?"✓ Benar!":"✗ Belum tepat."}</b> ${esc(q.e)}${opt.showLink?`<br><a href="#l/${q.subj}-${q.t}">📖 Pelajari materinya: ${esc(topic)} →</a>`:""}`;
@@ -115,7 +118,7 @@ function stepList(st,curId){
   const nx=nextLesson();
   return `<ol class="steps">${st.items.map(l=>{
     const d=S.done[l.id],cur=curId?l.id===curId:nx&&nx.id===l.id;
-    return `<li><a href="#l/${l.id}" class="${d?"done":""} ${cur?"cur":""}"><span class="dot">${d?"✓":l.idx+1}</span><span class="st">${esc(l.title)}<small>~${l.mins} menit${l.subj?" · "+qOfTopic(l.subj,l.topic).length+" soal cek":""}</small></span>${curId?"":mastChip(l.subj,l.topic)}</a></li>`;
+    return `<li><a href="#l/${l.id}" class="${d?"done":""} ${cur?"cur":""}"><span class="dot">${d?"✓":l.idx+1}</span><span class="st">${esc(l.title)}<small>~${l.mins} menit${l.subj?" · "+checkN(l.subj,l.topic)+" soal cek":""}</small></span>${curId?"":mastChip(l.subj,l.topic)}</a></li>`;
   }).join("")}</ol>`;
 }
 
@@ -160,7 +163,7 @@ function renderHome(el){
     ${STAGES.map(stageCard).join("")}
     <a class="card stage s-acc ${best!==null&&best>=80?"done":""}" href="#simulasi">
       <div class="num">⏱️</div>
-      <div class="grow"><div class="eyebrow">Tahap 5 · ±30 menit</div><h3>Simulasi MT</h3><p>Soal acak pakai timer, tanpa contekan jawaban. Hasilnya menunjukkan topik mana yang masih lemah.</p>
+      <div class="grow"><div class="eyebrow">Tahap 5 · ±45–90 menit</div><h3>Simulasi MT</h3><p>Format MT: 30 soal IIT + 30 soal ADS, pakai timer, tanpa contekan. Hasilnya menunjukkan topik yang masih lemah.</p>
         <div class="row"><div class="bar"><i style="width:${best||0}%"></i></div><span class="count">${best===null?"belum dicoba":"terbaik "+best}</span></div></div>
       <span class="go">→</span></a>
   </div>
@@ -207,7 +210,7 @@ function renderBelajar(el){
     ${STAGES.map((st,i)=>`<section class="card pstage ${st.cls}">
       <header><div class="num">${st.ic}</div><div class="grow"><div class="eyebrow">Tahap ${i+1} · ±${st.mins} menit</div><h2>${st.name}</h2><p>${st.desc}</p></div><span class="chip">${stageDone(st)}/${st.items.length}</span></header>
       ${stepList(st)}</section>`).join("")}
-    <section class="card pstage s-acc"><header><div class="num">⏱️</div><div class="grow"><div class="eyebrow">Tahap 5 · ±30 menit</div><h2>Simulasi MT</h2><p>Ujian percobaan pakai timer. Cara paling jujur buat tahu kamu sudah siap atau belum.</p></div><a class="btn sm primary" href="#simulasi">Mulai</a></header></section>
+    <section class="card pstage s-acc"><header><div class="num">⏱️</div><div class="grow"><div class="eyebrow">Tahap 5 · ±45–90 menit</div><h2>Simulasi MT</h2><p>Ujian percobaan pakai timer. Cara paling jujur buat tahu kamu sudah siap atau belum.</p></div><a class="btn sm primary" href="#simulasi">Mulai</a></header></section>
   </div>
   ${footer()}`;
 }
@@ -216,7 +219,7 @@ function renderBelajar(el){
 function renderLesson(el,id){
   const L=BYID[id],st=L.stage,n=st.items.length;
   const prev=LESSONS[L.g-1],next=LESSONS[L.g+1];
-  const qs=L.subj?qOfTopic(L.subj,L.topic):[];
+  const allq=L.subj?qOfTopic(L.subj,L.topic):[],qs=allq.slice(0,CHECK_N);
   el.innerHTML=`
   <div class="lesson ${st.cls}">
     <aside class="card lside">
@@ -233,7 +236,7 @@ function renderLesson(el,id){
       ${L.keys?`<div class="keys"><h3>🎯 Inti yang wajib nempel</h3><ul>${L.keys.map(k=>`<li><span>${k}</span></li>`).join("")}</ul></div>`:""}
       <div class="prose">${L.html}</div>
       ${L.gen?`<div class="note" style="margin-top:22px"><b>Mau latihan tipe ini lagi?</b> Hitung Acak bikin soal baru tanpa batas, lengkap dengan caranya. <a href="#latihan/hitung" data-gen="${L.gen}">Latih sekarang →</a></div>`:""}
-      ${qs.length?`<section class="lsec"><h2>✍️ Cek pemahaman</h2><p>Jawab dulu sebelum lanjut. Pembahasannya langsung muncul setelah kamu memilih.</p><div class="qlist" id="lq"></div><p class="faint" id="lqs" style="margin-top:12px;font-size:13.5px;font-weight:700"></p></section>`:""}
+      ${qs.length?`<section class="lsec"><h2>✍️ Cek pemahaman</h2><p>Jawab dulu sebelum lanjut. Pembahasannya langsung muncul setelah kamu memilih.</p><div class="qlist" id="lq"></div><p class="faint" id="lqs" style="margin-top:12px;font-size:13.5px;font-weight:700"></p>${allq.length>qs.length?`<a class="btn soft" style="margin-top:12px" href="#latihan/soal" data-drill="${L.subj}-${L.topic}">✍️ Latih semua ${allq.length} soal topik ini →</a>`:""}</section>`:""}
       <div class="lnav">
         ${prev?`<a class="btn" href="#l/${prev.id}">← <span class="t">${esc(prev.title)}</span></a>`:"<span></span>"}
         <button class="btn primary" id="ldone">✓ ${next?"Selesai, lanjut":"Selesai, ke Simulasi MT"} →</button>
@@ -485,17 +488,27 @@ function renderConv(body){
 
 /* ================= SIMULASI ================= */
 const PACKS=[
-  {id:"iit",name:"Paket IIT",ic:"💡",cls:"s-iit",n:20,min:25,desc:"20 soal acak dari seluruh topik Introduction to IT."},
-  {id:"ads",name:"Paket ADS",ic:"🧩",cls:"s-ads",n:20,min:25,desc:"20 soal acak dari seluruh topik Algorithm & Data Structure."},
-  {id:"mix",name:"Full Campuran",ic:"🔥",cls:"s-bedah",n:30,min:40,desc:"15 IIT + 15 ADS. Paling mirip suasana ujian beneran."}
+  {id:"iit",name:"MT IIT",ic:"💡",cls:"s-iit",n:30,min:45,desc:"30 soal seperti MT Introduction to IT, diambil merata dari ketujuh topik."},
+  {id:"ads",name:"MT ADS",ic:"🧩",cls:"s-ads",n:30,min:45,desc:"30 soal seperti MT Algorithm & Data Structure, diambil merata dari 12 topik."},
+  {id:"mix",name:"Full MT (IIT + ADS)",ic:"🔥",cls:"s-bedah",n:60,min:90,desc:"30 IIT + 30 ADS sekaligus. Latihan ketahanan paling mirip hari H."}
 ];
 let SIM=null,simTick=null;
 function startSim(id){
   const p=PACKS.find(x=>x.id===id);
-  const take=(s,n)=>shuffle(ALLQ.filter(q=>q.subj===s)).slice(0,n);
-  const items=id==="mix"?shuffle(take("iit",15).concat(take("ads",15))):take(id,p.n);
-  SIM={pack:p,items,ans:items.map(()=>null),flag:items.map(()=>false),cur:0,start:Date.now(),end:Date.now()+p.min*60000,done:false,filter:"wrong"};
+  const items=id==="mix"?take("iit",30).concat(take("ads",30)):take(id,p.n);
+  SIM={pack:p,items,perm:items.map(q=>shuffle(q.o.map((_,i)=>i))),ans:items.map(()=>null),flag:items.map(()=>false),cur:0,start:Date.now(),end:Date.now()+p.min*60000,done:false,filter:"wrong"};
   clearInterval(simTick);simTick=setInterval(tickSim,1000);
+}
+/* Ambil n soal merata per topik (proporsional dengan jumlah soal tiap topik), urutan topik tetap. */
+function take(subj,n){
+  const by=SUBJ[subj].topics.map((_,t)=>shuffle(qOfTopic(subj,t)));
+  const tot=by.reduce((a,b)=>a+b.length,0);
+  const floor=n>=by.length*2?2:1; // tiap topik minimal muncul 2 soal kalau kuotanya cukup
+  const alloc=by.map(b=>Math.min(b.length,Math.max(floor,Math.floor(n*b.length/tot))));
+  let left=n-alloc.reduce((a,b)=>a+b,0);
+  while(left<0){const t=alloc.indexOf(Math.max(...alloc));alloc[t]--;left++;}
+  for(const t of shuffle(by.map((_,i)=>i)))if(left>0&&alloc[t]<by[t].length){alloc[t]++;left--;}
+  return by.flatMap((b,t)=>shuffle(b.slice(0,alloc[t])));
 }
 function tickSim(){
   if(!SIM||SIM.done){clearInterval(simTick);return;}
@@ -528,7 +541,7 @@ function simSetup(el){
   </div>
   <div class="packs">${PACKS.map(p=>`<button class="card pack ${p.cls}" data-pack="${p.id}"><span class="ic">${p.ic}</span><h3>${p.name}</h3><p>${p.desc}</p><div class="row"><span class="chip">${p.n} soal</span><span class="chip">${p.min} menit</span></div></button>`).join("")}</div>
   <div class="sectiontitle"><div><div class="eyebrow">Riwayat</div><h2>Percobaan sebelumnya</h2></div></div>
-  ${S.sims.length?`<div class="hist">${S.sims.map(s=>`<div><span>${PACKS.find(p=>p.id===s.p).ic} ${PACKS.find(p=>p.id===s.p).name} · <span class="faint">${new Date(s.d).toLocaleString("id-ID",{weekday:"short",hour:"2-digit",minute:"2-digit"})}</span></span><span><b>${s.pct}</b> <span class="faint">(${s.ok}/${s.n} · ${mmss(s.secs)})</span></span></div>`).join("")}</div>`:`<p class="muted">Belum ada. Coba paket IIT atau ADS dulu, lalu Full Campuran sebagai penutup.</p>`}
+  ${S.sims.length?`<div class="hist">${S.sims.map(s=>`<div><span>${PACKS.find(p=>p.id===s.p).ic} ${PACKS.find(p=>p.id===s.p).name} · <span class="faint">${new Date(s.d).toLocaleString("id-ID",{weekday:"short",hour:"2-digit",minute:"2-digit"})}</span></span><span><b>${s.pct}</b> <span class="faint">(${s.ok}/${s.n} · ${mmss(s.secs)})</span></span></div>`).join("")}</div>`:`<p class="muted">Belum ada. Coba MT IIT atau MT ADS dulu, lalu Full MT sebagai penutup.</p>`}
   ${footer()}`;
   $$("[data-pack]",el).forEach(b=>b.addEventListener("click",()=>{startSim(b.dataset.pack);renderSim(el);window.scrollTo(0,0);}));
 }
@@ -547,7 +560,7 @@ function simExam(el){
       <div class="q ${SUBJ[q.subj].cls}">
         <div class="qmeta"><span class="qn">SOAL ${i+1} DARI ${n}</span><span class="chip">${SUBJ[q.subj].short}</span>${SIM.flag[i]?'<span class="mast mid">🚩 ragu</span>':""}</div>
         <div class="qt">${q.q}</div>
-        <div class="opts">${q.o.map((o,j)=>`<button class="opt ${SIM.ans[i]===j?"sel":""}" data-j="${j}"><span class="mk">${"ABCDE"[j]}</span><span class="ot">${esc(o)}</span></button>`).join("")}</div>
+        <div class="opts">${SIM.perm[i].map((oi,j)=>`<button class="opt ${SIM.ans[i]===oi?"sel":""}" data-j="${j}"><span class="mk">${"ABCDE"[j]}</span><span class="ot">${esc(q.o[oi])}</span></button>`).join("")}</div>
       </div>
       <div class="fnext examnav">
         <button class="btn" id="sprev" ${i===0?"disabled":""}>← Sebelumnya</button>
@@ -565,7 +578,7 @@ function simExam(el){
     </aside>
   </div>`;
   const go=k=>{SIM.cur=Math.max(0,Math.min(n-1,k));simExam(el);if(window.scrollY>80)window.scrollTo(0,0);};
-  SIM.go=go;SIM.pickOpt=j=>{if(j<q.o.length){SIM.ans[i]=j;simExam(el);}};
+  SIM.go=go;SIM.pickOpt=j=>{if(j<q.o.length){SIM.ans[i]=SIM.perm[i][j];simExam(el);}};
   $$(".opt",el).forEach(b=>b.addEventListener("click",()=>SIM.pickOpt(+b.dataset.j)));
   $$("[data-k]",el).forEach(b=>b.addEventListener("click",()=>go(+b.dataset.k)));
   $("#sprev",el).addEventListener("click",()=>go(i-1));
@@ -606,7 +619,7 @@ function simResult(el){
     const a=SIM.ans[i],ok=a===q.a;
     return `<div class="q ${SUBJ[q.subj].cls}"><div class="qmeta"><span class="qn">SOAL ${i+1}</span><span class="chip">${SUBJ[q.subj].short} · ${esc(SUBJ[q.subj].topics[q.t].t)}</span>${a===null?'<span class="mast">tidak dijawab</span>':ok?'<span class="mast hi">benar</span>':'<span class="mast lo">salah</span>'}</div>
       <div class="qt">${q.q}</div>
-      <div class="opts">${q.o.map((o,j)=>`<button class="opt ${j===q.a?"correct":j===a?"wrong":"dim"}" disabled><span class="mk">${"ABCDE"[j]}</span><span class="ot">${esc(o)}</span></button>`).join("")}</div>
+      <div class="opts">${SIM.perm[i].map((oi,j)=>`<button class="opt ${oi===q.a?"correct":oi===a?"wrong":"dim"}" disabled><span class="mk">${"ABCDE"[j]}</span><span class="ot">${esc(q.o[oi])}</span></button>`).join("")}</div>
       <div class="exp ${ok?"ok":"no"}">${esc(q.e)}<br><a href="#l/${q.subj}-${q.t}">📖 Baca materinya →</a></div></div>`;
   }).join("")||`<div class="card summary"><div class="big">💯</div><h2>Semua benar!</h2><p class="muted">Tidak ada yang perlu dibahas. Kamu siap.</p></div>`}</div>
   ${footer()}`;
@@ -737,6 +750,8 @@ window.addEventListener("hashchange",route);
 document.addEventListener("click",e=>{
   const r=e.target.closest("[data-reset]");
   if(r){if(confirm("Reset semua progres belajar, riwayat soal, dan simulasi di browser ini?")){S=fresh();save();P.queue=null;route();toast("Progres direset.");}return;}
+  const dr=e.target.closest("[data-drill]");
+  if(dr){const[s,t]=dr.dataset.drill.split("-");P.subj=s;P.topic=+t;P.onlyWrong=false;newQueue();}
   const g=e.target.closest("[data-gen]");
   if(g&&GEN[g.dataset.gen]){G.type=g.dataset.gen;genNew();}
 });

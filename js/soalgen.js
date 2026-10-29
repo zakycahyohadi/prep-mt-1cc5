@@ -110,6 +110,68 @@ const IIT=[
 
 /* ======================= ADS: KODE → OUTPUT ======================= */
 const OUT="Output program berikut adalah…";
+/* simulasi sorting: kembalikan isi array setelah k pass */
+const uniq=(n,lo,hi)=>{const a=[];while(a.length<n){const v=R(lo,hi);if(!a.includes(v))a.push(v);}return a;};
+const sj=a=>a.join(" ");
+function bubK(a0,k,desc){const a=a0.slice(),n=a.length;let sw=0;
+  for(let i=0;i<k;i++)for(let j=0;j<n-1-i;j++)if(desc?a[j]<a[j+1]:a[j]>a[j+1]){[a[j],a[j+1]]=[a[j+1],a[j]];sw++;}
+  a.sw=sw;return a;}
+function selK(a0,k){const a=a0.slice(),n=a.length;
+  for(let i=0;i<k;i++){let m=i;for(let j=i+1;j<n;j++)if(a[j]<a[m])m=j;[a[i],a[m]]=[a[m],a[i]];}return a;}
+function insK(a0,k){const a=a0.slice();
+  for(let i=1;i<=k;i++){const key=a[i];let j=i-1;while(j>=0&&a[j]>key){a[j+1]=a[j];j--;}a[j+1]=key;}return a;}
+function shellG(a0,gaps){const a=a0.slice(),n=a.length;
+  for(const g of gaps)for(let i=g;i<n;i++){const t=a[i];let j=i;for(;j>=g&&a[j-g]>t;j-=g)a[j]=a[j-g];a[j]=t;}return a;}
+/* soal isian kode: n = nama algoritma, c = kode, a = jawaban, w = pengecoh, e = pembahasan */
+const BLANKS=[
+ {n:"bubble sort (ascending)",c:"for (i = 0; i < n - 1; i++)\n    for (j = 0; j < ______; j++)\n        if (a[j] > a[j+1]) { ... }",a:"n - 1 - i",w:["n","n - 1 + i","i"],e:"j + 1 harus < n, dan i elemen terakhir sudah fix → n − 1 − i."},
+ {n:"tukar (swap)",c:"temp = a[j];\na[j] = a[j+1];\n______;",a:"a[j+1] = temp",w:["a[j] = temp","temp = a[j+1]","a[j+1] = a[j]"],e:"Simpan a[j] di temp, timpa a[j], lalu kembalikan temp ke a[j+1]."},
+ {n:"bubble sort (descending)",c:"for (i = 0; i < n - 1; i++)\n    for (j = 0; j < n - 1 - i; j++)\n        if (______) {\n            temp = a[j]; a[j] = a[j+1]; a[j+1] = temp;\n        }",a:"a[j] < a[j+1]",w:["a[j] > a[j+1]","a[j] == a[j+1]","a[i] < a[j]"],e:"Descending: tukar kalau kiri lebih KECIL, jadi yang besar pindah ke kiri."},
+ {n:"selection sort",c:"for (i = 0; i < n - 1; i++) {\n    ______;\n    for (j = i + 1; j < n; j++)\n        if (a[j] < a[min]) min = j;\n    temp = a[i]; a[i] = a[min]; a[min] = temp;\n}",a:"min = i",w:["min = 0","min = a[i]","min = j"],e:"Tiap pass, anggap dulu indeks i yang terkecil."},
+ {n:"selection sort",c:"for (j = i + 1; j < n; j++)\n    if (a[j] < a[min])\n        ______;",a:"min = j",w:["min = a[j]","a[min] = a[j]","j = min"],e:"min menyimpan INDEKS elemen terkecil, bukan nilainya."},
+ {n:"insertion sort",c:"for (i = 1; i < n; i++) {\n    key = a[i];\n    j = i - 1;\n    while (j >= 0 && a[j] > key) {\n        a[j + 1] = a[j];\n        j--;\n    }\n    ______;\n}",a:"a[j + 1] = key",w:["a[j] = key","a[i] = key","key = a[j]"],e:"Loop berhenti di j yang a[j] ≤ key, jadi celah kosong ada di j + 1."},
+ {n:"insertion sort",c:"key = a[i];\nj = i - 1;\nwhile (j >= 0 && ______) {\n    a[j + 1] = a[j];\n    j--;\n}",a:"a[j] > key",w:["a[j] < key","a[i] > key","j > key"],e:"Geser ke kanan selama elemen kiri lebih besar dari key."},
+ {n:"shell sort",c:"for (gap = ______; gap > 0; gap /= 2)\n    ...",a:"n / 2",w:["n","1","n * 2"],e:"Gap awal n/2, lalu dibagi 2 sampai 1."},
+ {n:"sequential search",c:"for (i = 0; i < n; i++)\n    if (a[i] == x) return i;\n______;",a:"return -1",w:["return 0","return i","return x"],e:"Kalau loop habis tanpa ketemu, kembalikan −1 (bukan indeks valid)."},
+ {n:"binary search",c:"while (bawah <= atas) {\n    tengah = ______;\n    ...\n}",a:"(bawah + atas) / 2",w:["(atas - bawah) * 2","bawah + atas","n / 2"],e:"Indeks tengah = (bawah + atas) / 2."},
+ {n:"binary search",c:"if (a[tengah] == x) return tengah;\nelse if (x < a[tengah]) ______;\nelse bawah = tengah + 1;",a:"atas = tengah - 1",w:["bawah = tengah - 1","atas = tengah + 1","tengah = atas"],e:"x lebih kecil → cari di kiri → batas atas digeser ke tengah − 1."},
+ {n:"binary search",c:"while (______) {\n    tengah = (bawah + atas) / 2;\n    ...\n}",a:"bawah <= atas",w:["bawah < n","tengah != x","atas > 0"],e:"Cari selama rentang masih ada. bawah > atas → tidak ketemu."},
+ {n:"mencari nilai maksimum",c:"mx = a[0];\nfor (i = 1; i < n; i++)\n    if (______) mx = a[i];",a:"a[i] > mx",w:["a[i] < mx","mx > a[i]","a[i] == mx"],e:"Ganti mx kalau ketemu nilai yang lebih besar."},
+ {n:"menjumlah isi array",c:"s = 0;\nfor (i = 0; i < n; i++)\n    ______;",a:"s += a[i]",w:["s = a[i]","s += i","a[i] += s"],e:"Tambahkan setiap elemen ke s."}
+];
+/* soal analogi: [cerita, jawaban, penjelasan] */
+const ALGOS=["Bubble sort","Selection sort","Insertion sort","Shell sort","Merge sort","Quick sort","Sequential search","Binary search","Queue (FIFO)","Stack (LIFO)"];
+const ANALOGI=[
+ ["Menyusun kartu remi di tangan: ambil satu kartu baru, lalu selipkan di posisi yang pas di antara kartu yang sudah urut.","Insertion sort","Ambil key, geser yang lebih besar, sisipkan."],
+ ["Gelembung udara di dalam air: yang paling besar pelan-pelan naik ke permukaan, ditukar sedikit demi sedikit dengan yang di sebelahnya.","Bubble sort","Tukar tetangga, yang terbesar 'menggelembung' ke ujung tiap pass."],
+ ["Guru olahraga menata barisan: tiap putaran dia mencari murid paling pendek di sisa barisan, lalu menaruhnya di depan.","Selection sort","Cari minimum sisa data, tukar ke depan (1 tukar per putaran)."],
+ ["Mencari nama di buku telepon atau kamus: buka halaman tengah, lalu pilih setengah depan atau belakang, ulangi.","Binary search","Bagi dua tiap langkah; syaratnya data urut."],
+ ["Mencari kunci di laci yang berantakan: ambil barang satu per satu dari depan sampai kuncinya ketemu.","Sequential search","Cek satu per satu, data tidak perlu urut."],
+ ["Antre di kasir minimarket: yang datang duluan dilayani duluan.","Queue (FIFO)","First In First Out: masuk di REAR, keluar di FRONT."],
+ ["Tumpukan piring kotor: piring yang terakhir ditaruh di atas justru yang dicuci pertama.","Stack (LIFO)","Last In First Out."],
+ ["Mengurutkan setumpuk kertas ujian: tumpukan dibagi dua terus sampai tinggal selembar-selembar, lalu digabung lagi sambil diurutkan.","Merge sort","Divide and conquer: bagi dua lalu gabung (merge)."],
+ ["Satu murid dipilih jadi patokan; yang lebih pendek disuruh berdiri di kirinya, yang lebih tinggi di kanan, lalu tiap kelompok diulang dengan patokan baru.","Quick sort","Pivot + partisi, lalu rekursif ke kiri dan kanan."],
+ ["Merapikan rak buku: pertama bandingkan buku yang berjauhan (jarak 4 rak), lalu jarak 2, terakhir yang bersebelahan.","Shell sort","Insertion sort dengan gap yang mengecil sampai 1."],
+ ["Menebak angka 1–100 dengan petunjuk 'lebih besar / lebih kecil': tebakan pertama 50, lalu 25 atau 75, dan seterusnya.","Binary search","Selalu ambil tengah dari rentang yang tersisa."],
+ ["Petugas absen memanggil nama mahasiswa satu per satu dari daftar sampai nama yang dicari menjawab.","Sequential search","Periksa berurutan dari awal."],
+ ["Mencetak dokumen ke printer kantor: dokumen yang dikirim lebih dulu dicetak lebih dulu.","Queue (FIFO)","Antrean print = FIFO."],
+ ["Tombol Undo di aplikasi: perubahan yang paling terakhir dibatalkan paling dulu.","Stack (LIFO)","Undo menyimpan riwayat dalam stack."],
+ ["Mengurutkan tinggi badan dengan cara membandingkan tiap pasangan yang bersebelahan dan menukarnya kalau salah, diulang sampai tidak ada yang ditukar.","Bubble sort","Bandingkan pasangan bersebelahan, tukar, ulangi per pass."]
+];
+/* soal library C: [kode, output, pengecoh, penjelasan] */
+function libq(){const v=R(0,7);
+  if(v===0){const w=P(["Algoritma","Struktur","Bahasa C","Sorting","Data","Pointer","Array"]),n=w.length;
+    return [`char s[20] = "${w}";\nprintf("%d", strlen(s));`,n,[n+1,n-1,20],`strlen menghitung karakter tanpa '\\0'${w.includes(" ")?" (spasi ikut dihitung)":""}: "${w}" = ${n}.`];}
+  if(v===1){const a=R(2,5),b=R(2,4),c=a**b;return [`printf("%.0f", pow(${a}, ${b}));`,c,[a*b,b**a,a+b],`pow(${a}, ${b}) = ${a}^${b} = ${c}. %.0f = tanpa desimal.`];}
+  if(v===2){const r=R(2,12),c=r.toFixed(1);return [`printf("%.1f", sqrt(${r*r}));`,c,[(r*r/2).toFixed(1),String(r),(r*r).toFixed(1)],`sqrt(${r*r}) = ${r}, dicetak %.1f → ${c}.`];}
+  if(v===3){const x=R(1,9)+R(1,9)/10,up=Math.random()<.5,c=(up?Math.ceil(x):Math.floor(x)).toFixed(1);
+    return [`printf("%.1f", ${up?"ceil":"floor"}(${x.toFixed(1)}));`,c,[(up?Math.floor(x):Math.ceil(x)).toFixed(1),x.toFixed(1),Math.round(x).toFixed(1)===c?String(Math.round(x)):Math.round(x).toFixed(1)],`${up?"ceil = bulatkan ke ATAS":"floor = bulatkan ke BAWAH"}: ${x.toFixed(1)} → ${c}.`];}
+  if(v===4){const ch=String.fromCharCode(R(97,122)),c=ch.toUpperCase();return [`printf("%c", toupper('${ch}'));`,c,[ch,String(c.charCodeAt(0)),"error"],`toupper (ctype.h) mengubah huruf kecil jadi besar → ${c}.`];}
+  if(v===5){const n=R(5,90),k=R(1,20);return [`printf("%d", abs(-${n}) + ${k});`,n+k,[k-n,n,-n-k],`abs(-${n}) = ${n} (nilai mutlak), lalu + ${k} = ${n+k}.`];}
+  if(v===6){const n=R(10,500),k=R(1,9);return [`printf("%d", atoi("${n}") + ${k});`,n+k,[String(n)+k,n,k],`atoi (stdlib.h) mengubah string "${n}" jadi int ${n}, lalu + ${k} = ${n+k}. Bukan disambung jadi "${n}${k}".`];}
+  const a=P(["abc","Data","kode"]),same=Math.random()<.5,b=same?a:a+"s";
+  return [`if (strcmp("${a}", "${b}") == 0)\n    printf("sama");\nelse\n    printf("beda");`,same?"sama":"beda",[same?"beda":"sama","0","1"],`strcmp mengembalikan 0 kalau kedua string sama persis. "${a}" vs "${b}" → ${same?"sama → 0 → cetak sama":"beda → bukan 0 → cetak beda"}.`];
+}
 const ADS=[
 {id:"divmod",t:4,w:1,make(){let a,b;do{a=R(10,99);b=R(2,9);}while(a%b===0);const q=Math.trunc(a/b),r=a%b;
   return Q(OUT+code(`int a = ${a}, b = ${b};\nprintf("%d %d", a / b, a % b);`),`${q} ${r}`,[`${(a/b).toFixed(1)} ${r}`,`${r} ${q}`,`${q+1} ${r}`,`${q} ${b-r}`],`a / b pada int membuang pecahan → ${a}/${b} = ${q}. a % b = sisa bagi → ${r}.`);}},
@@ -189,7 +251,38 @@ const ADS=[
   const n=R(5,7);for(let i=0;i<n;i++){if(q.length>1&&Math.random()<.35){ops.push("dequeue()");q.shift();st.pop();}else{val+=R(1,6);ops.push(`enqueue(${val})`);q.push(val);st.push(val);}}
   if(!ops.includes("dequeue()")){ops.push("dequeue()");q.shift();st.pop();}
   const f=a=>a.join(", ")||"(kosong)";
-  return Q(`Queue awalnya kosong. Setelah operasi berikut, isi queue dari FRONT ke REAR adalah…`+code(ops.join(";\n")+";"),f(q),[f(st),f(q.slice().reverse()),f(q.slice(1)),f(q.concat(val+1))],`FIFO: enqueue menambah di REAR, dequeue menghapus dari FRONT (yang paling lama masuk). Sisa: ${f(q)}. Kalau ${f(st)}, itu cara kerja stack (LIFO).`);}}
+  return Q(`Queue awalnya kosong. Setelah operasi berikut, isi queue dari FRONT ke REAR adalah…`+code(ops.join(";\n")+";"),f(q),[f(st),f(q.slice().reverse()),f(q.slice(1)),f(q.concat(val+1))],`FIFO: enqueue menambah di REAR, dequeue menghapus dari FRONT (yang paling lama masuk). Sisa: ${f(q)}. Kalau ${f(st)}, itu cara kerja stack (LIFO).`);}},
+{id:"seqsearch",t:10,w:2,make(){const a=uniq(6,1,30),x=P(a),j=R(0,5);let i2=j;while(i2===j)i2=R(0,5);a[i2]=x;const first=a.indexOf(x),last=a.lastIndexOf(x);
+  if(Math.random()<.5){const miss=Math.random()<.3,y=miss?R(31,50):x,c=miss?-1:first;
+    return Q(OUT+code(`int a[6] = {${a.join(", ")}};\nint i, x = ${y}, pos = -1;\nfor (i = 0; i < 6; i++)\n    if (a[i] == x) { pos = i; break; }\nprintf("%d", pos);`),c,[miss?0:last,miss?6:first+1,miss?y:-1,y],miss?`${y} tidak ada di array, jadi pos tetap −1.`:`Cek dari indeks 0. Ketemu pertama di a[${first}] lalu break → ${first}. Jebakan: indeks mulai 0, bukan 1.`,()=>R(0,5));}
+  return {...Q(`Perhatikan: tidak ada <code>break</code>. `+OUT+code(`int a[6] = {${a.join(", ")}};\nint i, pos = -1;\nfor (i = 0; i < 6; i++)\n    if (a[i] == ${x}) pos = i;\nprintf("%d", pos);`),last,[first,last+1,-1,x],`${x} ada di indeks ${first} dan ${last}. Tanpa break, pos terus ditimpa sampai loop habis → kemunculan TERAKHIR = ${last}.`),w:3};}},
+{id:"sortpass",t:12,w:2,make(){const alg=P(["bubble","selection","insertion"]),k=R(1,2),F={bubble:bubK,selection:selK,insertion:insK};
+  let a;do{a=uniq(5,1,30);}while(sj(F[alg](a,k))===sj(a)||sj(F[alg](a,k))===sj(a.slice().sort((x,y)=>x-y)));
+  const c=sj(F[alg](a,k)),srt=sj(a.slice().sort((x,y)=>x-y));
+  const steps=[];for(let s=1;s<=k;s++)steps.push(`${alg==="insertion"?"langkah":"pass"} ${s}: ${sj(F[alg](a,s))}`);
+  const why={bubble:"tukar tetangga yang salah urutan, yang terbesar menggelembung ke kanan",selection:"cari minimum sisa array lalu tukar ke depan (1 tukar per pass)",insertion:"ambil a[i] sebagai key, geser yang lebih besar ke kanan, sisipkan"}[alg];
+  return Q(`Data <b>{${a.join(", ")}}</b> diurutkan <b>ascending</b> dengan <b>${alg} sort</b>. Isi array setelah ${alg==="insertion"?`langkah ke-${k} (a[${k}] sudah disisipkan)`:`pass ke-${k}`} adalah…`,c,[...["bubble","selection","insertion"].filter(x=>x!==alg).map(x=>sj(F[x](a,k))),sj(F[alg](a,k===1?2:1)),srt],`${alg[0].toUpperCase()+alg.slice(1)} sort: ${why}. ${steps.join(" · ")}.`,()=>sj(a.slice().sort(()=>Math.random()-.5)));}},
+{id:"bubswap",t:12,w:3,make(){let a;do{a=uniq(5,1,30);}while(bubK(a,4).sw<3);const per=[];let tot=0;for(let p=1;p<=4;p++){const s=bubK(a,p).sw-tot;per.push(s);tot+=s;}
+  return Q(`Bubble sort ascending pada <b>{${a.join(", ")}}</b>. Berapa kali total pertukaran (swap) sampai data urut?`,tot,[tot+1,tot-1,4,10,per[0]],`Swap per pass: ${per.join(" + ")} = ${tot}. (Trik: hitung pasangan yang terbalik urutannya, jumlahnya sama dengan total swap bubble.)`,()=>R(0,10));}},
+{id:"shellgen",t:13,w:3,make(){const a=uniq(8,1,40),g4=shellG(a,[4]),g2=shellG(a,[4,2]),v=Math.random()<.6;
+  return Q(`Shell sort ascending pada <b>{${a.join(", ")}}</b> (n = 8, gap awal n/2). Isi array setelah putaran <b>gap ${v?4:2}</b> adalah…`,sj(v?g4:g2),[sj(v?g2:g4),sj(a.slice().sort((x,y)=>x-y)),sj(bubK(a,1)),sj(shellG(a,[2]))],v?`Gap 4: bandingkan pasangan indeks (0,4) (1,5) (2,6) (3,7), yang lebih kecil ke depan → ${sj(g4)}.`:`Gap 4 → ${sj(g4)}. Gap 2: urutkan indeks genap (0,2,4,6) dan ganjil (1,3,5,7) terpisah → ${sj(g2)}.`,()=>sj((v?g4:g2).slice().sort(()=>Math.random()-.5)));}},
+{id:"bubcode",t:14,w:3,make(){const a=uniq(5,1,30),k=R(1,3),desc=Math.random()<.4,r=bubK(a,k,desc),pr=Math.random()<.5;const idx=R(0,4);
+  const steps=[];for(let s=1;s<=k;s++)steps.push(`pass ${s}: ${sj(bubK(a,s,desc))}`);
+  const c=pr?sj(r):String(r[idx]),full=bubK(a,4,desc),alt=bubK(a,k,!desc);
+  return Q(OUT+code(`int a[5] = {${a.join(", ")}};\nint i, j, temp;\nfor (i = 0; i < ${k}; i++)\n    for (j = 0; j < 4 - i; j++)\n        if (a[j] ${desc?"<":">"} a[j+1]) {\n            temp = a[j]; a[j] = a[j+1]; a[j+1] = temp;\n        }\n`+(pr?`for (i = 0; i < 5; i++) printf("%d ", a[i]);`:`printf("%d", a[${idx}]);`)),c,pr?[sj(full),sj(alt),sj(bubK(a,k===1?2:k-1,desc)),sj(a)]:[full[idx],alt[idx],r[idx===0?1:idx-1],a[idx]].map(String),`Kondisi ${desc?"< → descending (besar ke kiri)":"> → ascending"}, loop luar cuma ${k} pass. ${steps.join(" · ")}${pr?"":` → a[${idx}] = ${r[idx]}`}.`,()=>pr?sj(a.slice().sort(()=>Math.random()-.5)):String(P(a)));}},
+{id:"selcode",t:14,w:3,make(){const a=uniq(5,1,30),k=R(1,3),r=selK(a,k);const steps=[];for(let s=1;s<=k;s++)steps.push(`pass ${s}: ${sj(selK(a,s))}`);
+  return Q(OUT+code(`int a[5] = {${a.join(", ")}};\nint i, j, min, temp;\nfor (i = 0; i < ${k}; i++) {\n    min = i;\n    for (j = i + 1; j < 5; j++)\n        if (a[j] < a[min]) min = j;\n    temp = a[i]; a[i] = a[min]; a[min] = temp;\n}\nfor (i = 0; i < 5; i++) printf("%d ", a[i]);`),sj(r),[sj(bubK(a,k)),sj(selK(a,4)),sj(insK(a,k)),sj(selK(a,k===1?2:k-1))],`Selection sort ${k} pass: tiap pass cari minimum dari indeks i ke kanan, tukar dengan a[i]. ${steps.join(" · ")}.`,()=>sj(a.slice().sort(()=>Math.random()-.5)));}},
+{id:"analogi",t:12,w:1,make(){const A=P(ANALOGI);
+  return Q(`Analogi berikut paling tepat menggambarkan algoritma/struktur data…<br><i>“${A[0]}”</i>`,A[1],ALGOS.filter(x=>x!==A[1]).sort(()=>Math.random()-.5),`${A[1]}: ${A[2]}`);}},
+{id:"libfn",t:15,w:2,make(){const [c,ans,w,e]=libq();
+  return Q(OUT+code(c),ans,w,e,()=>R(0,99));}},
+{id:"insout",t:14,w:3,make(){const a=uniq(5,1,30),k=R(1,3),r=insK(a,k);const steps=[];for(let s=1;s<=k;s++)steps.push(`i=${s}: ${sj(insK(a,s))}`);
+  return Q(OUT+code(`int a[5] = {${a.join(", ")}};\nint i, j, key;\nfor (i = 1; i <= ${k}; i++) {\n    key = a[i];\n    j = i - 1;\n    while (j >= 0 && a[j] > key) {\n        a[j + 1] = a[j];\n        j--;\n    }\n    a[j + 1] = key;\n}\nfor (i = 0; i < 5; i++) printf("%d ", a[i]);`),sj(r),[sj(bubK(a,k)),sj(selK(a,k)),sj(insK(a,4)),sj(insK(a,k===1?2:k-1))],`Insertion sort, loop sampai i = ${k}: tiap langkah key = a[i] disisipkan ke bagian kiri yang sudah urut. ${steps.join(" · ")}.`,()=>sj(a.slice().sort(()=>Math.random()-.5)));}},
+{id:"bsidx",t:10,w:2,make(){const n=R(7,10),a=[];let v=R(1,9);for(let i=0;i<n;i++){a.push(v);v+=R(2,9);}const hit=Math.random()<.7,x=hit?P(a):a[R(1,n-1)]-1;
+  let lo=0,hi=n-1,res=-1;const tr=[];while(lo<=hi){const m=Math.trunc((lo+hi)/2);tr.push(`(${lo}+${hi})/2=${m} → ${a[m]}`);if(a[m]===x){res=m;break;}if(x<a[m])hi=m-1;else lo=m+1;}
+  return Q(OUT+code(`int a[${n}] = {${a.join(", ")}};\nint x = ${x}, bawah = 0, atas = ${n-1}, tengah, pos = -1;\nwhile (bawah <= atas) {\n    tengah = (bawah + atas) / 2;\n    if (a[tengah] == x) { pos = tengah; break; }\n    else if (x < a[tengah]) atas = tengah - 1;\n    else bawah = tengah + 1;\n}\nprintf("%d", pos);`),res,[hit?res+1:0,hit?-1:tr.length,hit?x:n,Math.trunc((n-1)/2)],`Trace tengah: ${tr.join(" · ")}. ${hit?`Ketemu di indeks ${res} (indeks mulai 0).`:`${x} tidak ada, bawah > atas → pos tetap −1.`}`,()=>R(0,n));}},
+{id:"blank",t:14,w:1,make(){const B=P(BLANKS);
+  return Q(`Lengkapi bagian yang kosong (______) pada kode ${B.n} berikut:`+code(B.c),B.a,B.w,B.e);}}
 ];
 
 window.GENQ={iit:IIT,ads:ADS};

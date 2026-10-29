@@ -301,20 +301,58 @@ contoh[4] = 63;    <span class="cm">// ubah elemen indeks 4</span></pre>
    <li>Kalau tipe keluaran tak ditulis → dianggap <span class="inlinecode">int</span> (default). <b>Prototype</b> = deklarasi fungsi di atas <span class="inlinecode">main</span>.</li>
   </ul>`},
 
- {t:"Searching — Sequential & Binary", k:["Sequential: cek satu per satu, tak perlu urut, lambat", "Binary: WAJIB terurut · tengah = (bawah + atas) / 2 · buang setengah tiap langkah"], h:`
-  <p><b>Algoritma pencarian</b> = mencari posisi elemen dalam array. Dua yang utama: sequential dan binary.</p>
-  <h4>Sequential / Linear Search</h4>
+ {t:"Searching — Sequential, Binary & lainnya", k:["Sequential: cek satu-satu dari indeks 0, tak perlu urut · O(n) · tidak ketemu → <code>return -1</code>", "Binary: WAJIB terurut · tengah = (bawah + atas) / 2 · kiri: <code>atas = tengah - 1</code> · kanan: <code>bawah = tengah + 1</code> · O(log n)", "Sentinel: data dicari ditaruh di ujung array → loop pasti berhenti", "Interpolation: tebak posisi pakai proporsi (urut &amp; merata) · Jump: lompat √n lalu sequential"], h:`
+  <p><b>Searching</b> = mencari posisi sebuah data (kunci / <i>key</i>) di dalam array. Hasilnya biasanya <b>indeks</b> tempat data ditemukan, atau <b>−1</b> kalau tidak ada (karena indeks valid mulai 0).</p>
+  <h4>1. Sequential / Linear Search</h4>
   <ul>
-   <li>Periksa elemen <b>satu per satu</b> dari awal sampai ketemu (atau habis).</li>
-   <li>Sederhana tapi <b>lambat</b>; cocok untuk data sedikit. Kasus terburuk: elemen ada di akhir → semua dicek.</li>
+   <li>Periksa elemen <b>satu per satu</b> dari indeks 0 sampai ketemu atau array habis.</li>
+   <li>Data <b>tidak perlu terurut</b>. Sederhana tapi lambat untuk data besar: kasus terburuk n perbandingan → <b>O(n)</b>.</li>
+   <li>Kalau ada data kembar dan fungsi langsung <span class="inlinecode">return</span>, yang didapat indeks <b>kemunculan pertama</b>.</li>
   </ul>
-  <h4>Binary Search (pencarian bagi dua)</h4>
+  <pre class="code"><span class="kw">int</span> <span class="fn">sequentialSearch</span>(<span class="kw">int</span> a[], <span class="kw">int</span> n, <span class="kw">int</span> x) {
+    <span class="kw">int</span> i;
+    <span class="kw">for</span> (i = 0; i &lt; n; i++)
+        <span class="kw">if</span> (a[i] == x) <span class="kw">return</span> i;   <span class="cm">// ketemu → kembalikan indeks</span>
+    <span class="kw">return</span> -1;                     <span class="cm">// sampai habis tidak ketemu</span>
+}</pre>
+  <h4>2. Sequential dengan Sentinel</h4>
+  <p>Data yang dicari ditaruh dulu di <b>ujung array</b> (sentinel = penjaga). Loop pasti berhenti, jadi tak perlu cek <span class="inlinecode">i &lt; n</span> tiap putaran (sedikit lebih cepat). Kalau berhentinya di posisi sentinel, artinya <b>tidak ketemu</b>.</p>
+  <h4>3. Binary Search (bagi dua)</h4>
   <ul>
-   <li><b>Syarat mutlak: array harus sudah terurut.</b></li>
-   <li>Cek elemen <b>tengah</b>: <span class="inlinecode">tengah = (bawah + atas) / 2</span>. Sama → ketemu; yang dicari lebih kecil → cari ke kiri; lebih besar → cari ke kanan. Ulangi.</li>
-   <li>Jauh lebih cepat — seperti cari nama di buku telepon: buka tengah, bukan dari halaman 1.</li>
+   <li><b>Syarat mutlak: data sudah terurut.</b></li>
+   <li>Ambil tengah: <span class="inlinecode">tengah = (bawah + atas) / 2</span> (pembagian int, dibulatkan ke bawah).</li>
+   <li>Sama → ketemu. Yang dicari <b>lebih kecil</b> → ke kiri: <span class="inlinecode">atas = tengah - 1</span>. <b>Lebih besar</b> → ke kanan: <span class="inlinecode">bawah = tengah + 1</span>.</li>
+   <li>Berhenti kalau <span class="inlinecode">bawah &gt; atas</span> → tidak ketemu. Tiap langkah membuang setengah data → <b>O(log n)</b>. 1000 data cukup ±10 langkah.</li>
   </ul>
-  <div class="note">Contoh: array indeks 0–8 → bawah=0, atas=8, tengah=(0+8)/2=4. Bandingkan dengan arr[4], lalu persempit setengah tiap langkah.</div>`},
+  <pre class="code"><span class="kw">int</span> <span class="fn">binarySearch</span>(<span class="kw">int</span> a[], <span class="kw">int</span> n, <span class="kw">int</span> x) {
+    <span class="kw">int</span> bawah = 0, atas = n - 1, tengah;
+    <span class="kw">while</span> (bawah &lt;= atas) {
+        tengah = (bawah + atas) / 2;
+        <span class="kw">if</span> (a[tengah] == x) <span class="kw">return</span> tengah;
+        <span class="kw">else if</span> (x &lt; a[tengah]) atas = tengah - 1;   <span class="cm">// cari di kiri</span>
+        <span class="kw">else</span> bawah = tengah + 1;                       <span class="cm">// cari di kanan</span>
+    }
+    <span class="kw">return</span> -1;
+}</pre>
+  <h4>Contoh trace binary search</h4>
+  <p>Data <span class="inlinecode">{3, 8, 12, 17, 21, 25, 30, 34, 40}</span> (indeks 0–8), cari <b>30</b>:</p>
+  <div class="tblwrap"><table class="tbl"><tr><th>Langkah</th><th>bawah</th><th>atas</th><th>tengah</th><th>a[tengah]</th><th>Keputusan</th></tr>
+   <tr><td>1</td><td>0</td><td>8</td><td>4</td><td>21</td><td>30 &gt; 21 → bawah = 5</td></tr>
+   <tr><td>2</td><td>5</td><td>8</td><td>6</td><td>30</td><td>Ketemu di indeks 6</td></tr>
+  </table></div>
+  <p>Cari <b>10</b>: tengah 4 (21) → atas = 3 · tengah 1 (8) → bawah = 2 · tengah 2 (12) → atas = 1 · bawah (2) &gt; atas (1) → <b>−1</b>.</p>
+  <h4>4. Lainnya (cukup hafal idenya)</h4>
+  <ul>
+   <li><b>Interpolation search</b>: seperti binary, tapi posisi ditebak pakai proporsi nilai: <span class="inlinecode">pos = bawah + (x − a[bawah]) × (atas − bawah) / (a[atas] − a[bawah])</span>. Syarat: terurut &amp; nilainya <b>tersebar merata</b>. Kayak buka kamus: cari kata berawalan "W" langsung buka bagian belakang.</li>
+   <li><b>Jump search</b>: data terurut, lompat per <b>√n</b> elemen sampai kelewatan, lalu sequential di blok itu → O(√n).</li>
+   <li><b>Hashing</b>: posisi dihitung langsung dari kunci pakai fungsi hash → rata-rata O(1).</li>
+  </ul>
+  <div class="tblwrap"><table class="tbl"><tr><th>Metode</th><th>Data harus urut?</th><th>Kecepatan</th></tr>
+   <tr><td>Sequential</td><td>Tidak</td><td>O(n), lambat</td></tr>
+   <tr><td>Binary</td><td><b>Ya</b></td><td>O(log n), cepat</td></tr>
+   <tr><td>Interpolation</td><td>Ya + merata</td><td>O(log log n) rata-rata</td></tr>
+   <tr><td>Jump</td><td>Ya</td><td>O(√n)</td></tr>
+  </table></div>`},
 
  {t:"Queue (Antrian) — FIFO", k:["FIFO: pertama masuk, pertama keluar", "Enqueue di REAR (belakang) · dequeue di FRONT (depan)", "Stack = LIFO (kebalikannya)"], h:`
   <p><b>Queue</b> = struktur data antrian berprinsip <b>FIFO</b> (First In, First Out): yang pertama masuk = pertama keluar. Seperti antrean kasir.</p>
@@ -325,7 +363,273 @@ contoh[4] = 63;    <span class="cm">// ubah elemen indeks 4</span></pre>
    <li><b>Insert / Enqueue</b> — tambah elemen di REAR (belakang).</li>
    <li><b>Delete / Dequeue</b> — hapus elemen dari FRONT (depan).</li>
   </ul>
-  <div class="note">Implementasi: pakai <b>array</b> (harus tahu ukuran maks dulu) atau <b>linked list</b> (lebih fleksibel). Bedakan: <b>Stack</b> = LIFO (Last In First Out), <b>Queue</b> = FIFO.</div>`}
+  <div class="note">Implementasi: pakai <b>array</b> (harus tahu ukuran maks dulu) atau <b>linked list</b> (lebih fleksibel). Bedakan: <b>Stack</b> = LIFO (Last In First Out), <b>Queue</b> = FIFO.</div>`},
+
+ {t:"Sorting Dasar — Bubble, Selection, Insertion", k:["Bubble: tukar tetangga, terbesar menggelembung ke kanan tiap pass · n − 1 pass", "Selection: cari minimum sisa array, tukar ke depan · maks 1 tukar per pass", "Insertion: ambil key, geser yang lebih besar, sisipkan (kayak nyusun kartu remi)", "Pass 1 dari {5,3,8,1,4} → bubble <b>3 5 1 4 8</b> · selection <b>1 3 8 5 4</b> · insertion <b>3 5 8 1 4</b>"], h:`
+  <p><b>Sorting</b> = mengurutkan data: <b>ascending</b> (kecil → besar) atau <b>descending</b> (besar → kecil). Di soal biasanya diminta "isi array setelah pass ke-k" atau "lengkapi kode yang kosong". Semua contoh di bawah pakai data yang sama: <span class="inlinecode">{5, 3, 8, 1, 4}</span>, ascending.</p>
+
+  <h4>1. Bubble Sort: tukar tetangga</h4>
+  <ul>
+   <li>Bandingkan 2 elemen <b>bersebelahan</b>; kalau urutannya salah, <b>tukar</b>.</li>
+   <li>Tiap pass, elemen <b>terbesar "menggelembung" ke kanan</b> (posisi akhirnya). Pass berikutnya cukup sampai sebelum elemen yang sudah fix.</li>
+   <li>n data → maksimal <b>n − 1 pass</b>.</li>
+  </ul>
+  <div class="tblwrap"><table class="tbl"><tr><th>Pass</th><th>Proses</th><th>Hasil</th></tr>
+   <tr><td>1</td><td>5↔3 tukar · 5,8 tetap · 8↔1 tukar · 8↔4 tukar</td><td><b>3 5 1 4 8</b></td></tr>
+   <tr><td>2</td><td>3,5 tetap · 5↔1 tukar · 5↔4 tukar</td><td><b>3 1 4 5 8</b></td></tr>
+   <tr><td>3</td><td>3↔1 tukar · 3,4 tetap</td><td><b>1 3 4 5 8</b></td></tr>
+   <tr><td>4</td><td>1,3 tetap</td><td><b>1 3 4 5 8</b></td></tr>
+  </table></div>
+  <pre class="code"><span class="kw">void</span> <span class="fn">bubbleSort</span>(<span class="kw">int</span> a[], <span class="kw">int</span> n) {
+    <span class="kw">int</span> i, j, temp;
+    <span class="kw">for</span> (i = 0; i &lt; n - 1; i++)            <span class="cm">// pass ke-(i+1)</span>
+        <span class="kw">for</span> (j = 0; j &lt; n - 1 - i; j++)    <span class="cm">// -i: i elemen terakhir sudah fix</span>
+            <span class="kw">if</span> (a[j] &gt; a[j + 1]) {         <span class="cm">// &gt; ascending · &lt; descending</span>
+                temp = a[j];               <span class="cm">// tukar 3 langkah</span>
+                a[j] = a[j + 1];
+                a[j + 1] = temp;
+            }
+}</pre>
+  <div class="note">Total tukar di contoh: 3 + 2 + 1 = <b>6 kali</b>. Versi pakai <b>flag</b> (berhenti kalau satu pass tidak ada tukar) membuat data yang sudah urut cukup 1 pass → best case O(n).</div>
+
+  <h4>2. Selection Sort: pilih yang terkecil</h4>
+  <ul>
+   <li>Pass ke-i: cari <b>nilai minimum</b> dari indeks i sampai akhir, lalu <b>tukar ke posisi i</b>.</li>
+   <li>Tiap pass <b>maksimal 1 kali tukar</b> → total tukar paling sedikit di antara ketiganya (≤ n − 1).</li>
+  </ul>
+  <div class="tblwrap"><table class="tbl"><tr><th>Pass</th><th>Minimum di sisa array</th><th>Hasil</th></tr>
+   <tr><td>1 (i=0)</td><td>1 (indeks 3) ↔ a[0]=5</td><td><b>1 3 8 5 4</b></td></tr>
+   <tr><td>2 (i=1)</td><td>3 sudah di tempatnya</td><td><b>1 3 8 5 4</b></td></tr>
+   <tr><td>3 (i=2)</td><td>4 (indeks 4) ↔ a[2]=8</td><td><b>1 3 4 5 8</b></td></tr>
+   <tr><td>4 (i=3)</td><td>5 sudah di tempatnya</td><td><b>1 3 4 5 8</b></td></tr>
+  </table></div>
+  <pre class="code"><span class="kw">void</span> <span class="fn">selectionSort</span>(<span class="kw">int</span> a[], <span class="kw">int</span> n) {
+    <span class="kw">int</span> i, j, min, temp;
+    <span class="kw">for</span> (i = 0; i &lt; n - 1; i++) {
+        min = i;                        <span class="cm">// anggap a[i] terkecil</span>
+        <span class="kw">for</span> (j = i + 1; j &lt; n; j++)
+            <span class="kw">if</span> (a[j] &lt; a[min])
+                min = j;                <span class="cm">// simpan INDEKS terkecil</span>
+        temp = a[i];
+        a[i] = a[min];
+        a[min] = temp;
+    }
+}</pre>
+
+  <h4>3. Insertion Sort: sisipkan kayak nyusun kartu</h4>
+  <ul>
+   <li>Bagian kiri dianggap sudah urut. Ambil elemen berikutnya (<span class="inlinecode">key</span>), <b>geser</b> elemen kiri yang lebih besar ke kanan, lalu <b>sisipkan</b> key di celahnya.</li>
+   <li>Seperti menyusun kartu remi di tangan. Sangat cepat kalau data <b>hampir urut</b> (best case O(n)).</li>
+  </ul>
+  <div class="tblwrap"><table class="tbl"><tr><th>Langkah</th><th>key</th><th>Hasil</th></tr>
+   <tr><td>i=1</td><td>3 → geser 5</td><td><b>3 5 8 1 4</b></td></tr>
+   <tr><td>i=2</td><td>8 → tidak geser</td><td><b>3 5 8 1 4</b></td></tr>
+   <tr><td>i=3</td><td>1 → geser 8, 5, 3</td><td><b>1 3 5 8 4</b></td></tr>
+   <tr><td>i=4</td><td>4 → geser 8, 5</td><td><b>1 3 4 5 8</b></td></tr>
+  </table></div>
+  <pre class="code"><span class="kw">void</span> <span class="fn">insertionSort</span>(<span class="kw">int</span> a[], <span class="kw">int</span> n) {
+    <span class="kw">int</span> i, j, key;
+    <span class="kw">for</span> (i = 1; i &lt; n; i++) {
+        key = a[i];
+        j = i - 1;
+        <span class="kw">while</span> (j &gt;= 0 &amp;&amp; a[j] &gt; key) {
+            a[j + 1] = a[j];            <span class="cm">// geser ke kanan</span>
+            j--;
+        }
+        a[j + 1] = key;                 <span class="cm">// sisipkan</span>
+    }
+}</pre>
+  <div class="note"><b>Cara bedain cepat soal "hasil pass ke-1":</b> Bubble → yang <b>terbesar sudah di kanan</b>. Selection → yang <b>terkecil sudah di kiri</b>, sisanya hampir tak berubah (cuma 1 tukar). Insertion → hanya <b>2 elemen pertama</b> yang diurutkan.</div>`},
+
+ {t:"Sorting Lanjutan — Shell, Merge, Quick + Perbandingan", k:["Shell (Donald Shell): insertion dengan gap n/2 → … → 1 · n = 8 → gap 4, 2, 1", "Merge: divide &amp; conquer, bagi dua lalu gabung · selalu O(n log n) · stabil · butuh memori tambahan", "Quick: pivot + partisi (kecil kiri, besar kanan) · rata-rata O(n log n), terburuk O(n²)", "O(n²): bubble, selection, insertion · Tidak stabil: selection, shell, quick, heap"], h:`
+  <h4>4. Shell Sort: insertion dengan jarak (gap)</h4>
+  <ul>
+   <li>Dibuat <b>Donald Shell</b> (1959). Pengembangan insertion sort: elemen yang <b>berjarak gap</b> dibandingkan dulu, jadi data kecil bisa "loncat jauh" ke depan.</li>
+   <li>Gap awal <b>n / 2</b>, lalu dibagi 2 terus: n = 8 → gap <b>4, 2, 1</b>. Gap terakhir selalu <b>1</b> (= insertion sort biasa, tapi datanya sudah hampir urut jadi cepat).</li>
+  </ul>
+  <p>Contoh <span class="inlinecode">{8, 5, 3, 9, 1, 6, 2, 7}</span>, n = 8:</p>
+  <div class="tblwrap"><table class="tbl"><tr><th>Gap</th><th>Yang dibandingkan</th><th>Hasil</th></tr>
+   <tr><td>4</td><td>indeks (0,4) 8↔1 · (1,5) 5,6 tetap · (2,6) 3↔2 · (3,7) 9↔7</td><td><b>1 5 2 7 8 6 3 9</b></td></tr>
+   <tr><td>2</td><td>indeks genap 1,2,8,3 → 1,2,3,8 · ganjil 5,7,6,9 → 5,6,7,9</td><td><b>1 5 2 6 3 7 8 9</b></td></tr>
+   <tr><td>1</td><td>insertion sort biasa</td><td><b>1 2 3 5 6 7 8 9</b></td></tr>
+  </table></div>
+  <pre class="code"><span class="kw">void</span> <span class="fn">shellSort</span>(<span class="kw">int</span> a[], <span class="kw">int</span> n) {
+    <span class="kw">int</span> gap, i, j, temp;
+    <span class="kw">for</span> (gap = n / 2; gap &gt; 0; gap /= 2)          <span class="cm">// 4, 2, 1</span>
+        <span class="kw">for</span> (i = gap; i &lt; n; i++) {
+            temp = a[i];
+            <span class="kw">for</span> (j = i; j &gt;= gap &amp;&amp; a[j - gap] &gt; temp; j -= gap)
+                a[j] = a[j - gap];
+            a[j] = temp;
+        }
+}</pre>
+
+  <h4>5. Merge Sort: bagi, urutkan, gabung</h4>
+  <ul>
+   <li>Prinsip <b>divide and conquer</b>: belah array jadi dua terus sampai tinggal 1 elemen, lalu <b>gabungkan (merge)</b> sambil mengurutkan.</li>
+   <li>Selalu <b>O(n log n)</b>, stabil, tapi butuh <b>memori tambahan</b> (array sementara).</li>
+  </ul>
+  <pre class="work">{38, 27, 43, 3}
+bagi   → {38, 27}   {43, 3}
+bagi   → {38} {27}  {43} {3}
+gabung → {27, 38}   {3, 43}
+gabung → {3, 27, 38, 43}</pre>
+
+  <h4>6. Quick Sort: pilih pivot, partisi</h4>
+  <ul>
+   <li>Juga <b>divide and conquer</b> (Tony Hoare). Pilih <b>pivot</b>, pindahkan yang <b>lebih kecil ke kiri</b> pivot dan yang <b>lebih besar ke kanan</b> (partisi), lalu ulangi untuk bagian kiri &amp; kanan.</li>
+   <li>Rata-rata <b>O(n log n)</b> dan biasanya paling cepat dalam praktik. Terburuk <b>O(n²)</b> kalau pivot selalu terkecil/terbesar (mis. data sudah urut + pivot elemen ujung).</li>
+  </ul>
+  <pre class="work">{7, 2, 9, 4, 3}    pivot = 3 (elemen terakhir)
+partisi → {2} 3 {9, 4, 7}
+kanan   → pivot 7 → {4} 7 {9}
+hasil   → {2, 3, 4, 7, 9}</pre>
+
+  <h4>Lainnya (sekadar kenal nama)</h4>
+  <ul>
+   <li><b>Exchange sort</b>: mirip bubble, tapi elemen ke-i dibandingkan dengan <b>semua</b> elemen sesudahnya (bukan tetangga saja), tukar kalau salah urutan.</li>
+   <li><b>Heap sort</b>: pakai struktur heap (pohon biner); selalu O(n log n).</li>
+   <li><b>Counting / Radix sort</b>: tidak membandingkan antar-elemen, tapi menghitung/mengelompokkan per digit. Khusus bilangan bulat.</li>
+  </ul>
+
+  <h4>Tabel perbandingan (wajib hafal)</h4>
+  <div class="tblwrap"><table class="tbl"><tr><th>Algoritma</th><th>Ide singkat</th><th>Terbaik</th><th>Rata-rata</th><th>Terburuk</th><th>Stabil?</th></tr>
+   <tr><td>Bubble</td><td>Tukar tetangga, terbesar ke kanan</td><td>O(n)*</td><td>O(n²)</td><td>O(n²)</td><td>Ya</td></tr>
+   <tr><td>Selection</td><td>Cari minimum, tukar ke depan</td><td>O(n²)</td><td>O(n²)</td><td>O(n²)</td><td>Tidak</td></tr>
+   <tr><td>Insertion</td><td>Sisipkan ke bagian yang urut</td><td>O(n)</td><td>O(n²)</td><td>O(n²)</td><td>Ya</td></tr>
+   <tr><td>Shell</td><td>Insertion dengan gap mengecil</td><td>O(n log n)</td><td>±O(n<sup>1,5</sup>)</td><td>O(n²)</td><td>Tidak</td></tr>
+   <tr><td>Merge</td><td>Bagi dua, gabung terurut</td><td>O(n log n)</td><td>O(n log n)</td><td>O(n log n)</td><td>Ya</td></tr>
+   <tr><td>Quick</td><td>Pivot + partisi</td><td>O(n log n)</td><td>O(n log n)</td><td>O(n²)</td><td>Tidak</td></tr>
+  </table></div>
+  <div class="note">* Bubble O(n) hanya untuk versi pakai flag. <b>Stabil</b> = data bernilai sama tetap mempertahankan urutan aslinya. <b>O(n²)</b>: bubble, selection, insertion (sederhana, cocok data kecil). <b>O(n log n)</b>: merge, quick, heap (cocok data besar).</div>`},
+
+ {t:"Soal Kode — Tebak Output & Isi yang Kosong", k:["Trace pakai tabel variabel, jalankan baris per baris", "Swap 3 langkah: <code>temp = a[j]; a[j] = a[j+1]; a[j+1] = temp;</code>", "Bubble: <code>&gt;</code> = ascending · <code>&lt;</code> = descending", "Cek batas loop luar: kalau cuma k pass, array belum tentu urut"], h:`
+  <p>Dua jenis soal kode yang biasa keluar di MT: <b>(1) tebak output</b> dan <b>(2) isi bagian kode yang kosong</b>. Dua-duanya dikerjakan dengan cara yang sama: <b>trace pakai tabel</b>.</p>
+  <h4>Cara trace (tebak output)</h4>
+  <ol>
+   <li>Tulis semua variabel jadi kolom tabel (i, j, a[...], temp, dll).</li>
+   <li>Jalankan baris per baris seperti komputer. Tiap ada nilai berubah → tulis baris baru.</li>
+   <li>Awas jebakan: <b>indeks mulai 0</b>, <b>int ÷ int dibulatkan ke bawah</b>, <b>i++ tetap jalan setelah iterasi terakhir</b>, <span class="inlinecode">&lt;</span> vs <span class="inlinecode">&lt;=</span>.</li>
+   <li>Tulis output persis sesuai <span class="inlinecode">printf</span>: spasi, koma, <span class="inlinecode">\\n</span>.</li>
+  </ol>
+  <h4>Bagian yang paling sering dikosongkan</h4>
+  <div class="tblwrap"><table class="tbl"><tr><th>Kode</th><th>Isian yang benar</th></tr>
+   <tr><td>Tukar (swap)</td><td><code>temp = a[j]; a[j] = a[j+1]; a[j+1] = temp;</code></td></tr>
+   <tr><td>Bubble: loop luar / dalam</td><td><code>i &lt; n - 1</code> · <code>j &lt; n - 1 - i</code></td></tr>
+   <tr><td>Bubble: ascending / descending</td><td><code>a[j] &gt; a[j+1]</code> · <code>a[j] &lt; a[j+1]</code></td></tr>
+   <tr><td>Selection: awal pass</td><td><code>min = i;</code></td></tr>
+   <tr><td>Selection: loop dalam &amp; if</td><td><code>j = i + 1; j &lt; n</code> · <code>min = j;</code></td></tr>
+   <tr><td>Insertion: awal</td><td><code>key = a[i]; j = i - 1;</code></td></tr>
+   <tr><td>Insertion: kondisi while</td><td><code>j &gt;= 0 &amp;&amp; a[j] &gt; key</code></td></tr>
+   <tr><td>Insertion: geser &amp; sisip</td><td><code>a[j+1] = a[j]; j--;</code> · <code>a[j+1] = key;</code></td></tr>
+   <tr><td>Shell: gap</td><td><code>gap = n / 2; gap &gt; 0; gap /= 2</code></td></tr>
+   <tr><td>Sequential search</td><td><code>if (a[i] == x) return i;</code> · akhir <code>return -1;</code></td></tr>
+   <tr><td>Binary search</td><td><code>while (bawah &lt;= atas)</code> · <code>tengah = (bawah + atas) / 2;</code></td></tr>
+   <tr><td>Binary: geser batas</td><td>kiri <code>atas = tengah - 1;</code> · kanan <code>bawah = tengah + 1;</code></td></tr>
+   <tr><td>Cari maksimum</td><td><code>mx = a[0];</code> · <code>if (a[i] &gt; mx) mx = a[i];</code></td></tr>
+   <tr><td>Jumlah / rata-rata</td><td><code>s = 0;</code> · <code>s += a[i];</code> · <code>(float)s / n</code></td></tr>
+  </table></div>
+  <h4>Contoh 1: isi yang kosong</h4>
+  <pre class="code"><span class="kw">for</span> (i = 0; i &lt; n - 1; i++)
+    <span class="kw">for</span> (j = 0; j &lt; ______; j++)
+        <span class="kw">if</span> (a[j] &lt; a[j + 1]) {
+            temp = a[j];
+            a[j] = a[j + 1];
+            ______;
+        }</pre>
+  <p>Jawaban: <span class="inlinecode">n - 1 - i</span> dan <span class="inlinecode">a[j + 1] = temp</span>. Karena pakai <span class="inlinecode">&lt;</span>, hasilnya <b>descending</b> (besar → kecil).</p>
+  <h4>Contoh 2: tebak output</h4>
+  <pre class="code"><span class="kw">int</span> a[5] = {4, 2, 7, 1, 3};
+<span class="kw">int</span> i, j, temp;
+<span class="kw">for</span> (i = 0; i &lt; 2; i++)              <span class="cm">// cuma 2 pass!</span>
+    <span class="kw">for</span> (j = 0; j &lt; 4 - i; j++)
+        <span class="kw">if</span> (a[j] &gt; a[j + 1]) {
+            temp = a[j]; a[j] = a[j + 1]; a[j + 1] = temp;
+        }
+<span class="kw">for</span> (i = 0; i &lt; 5; i++) <span class="fn">printf</span>(<span class="st">"%d "</span>, a[i]);</pre>
+  <p>Pass 1: 4↔2, 4,7 tetap, 7↔1, 7↔3 → <b>2 4 1 3 7</b>. Pass 2: 2,4 tetap, 4↔1, 4↔3 → <b>2 1 3 4 7</b>. Output: <span class="inlinecode">2 1 3 4 7</span> (belum urut sempurna karena loop luar cuma 2 kali).</p>
+  <div class="note">Jebakan favorit: loop luar dibatasi (<span class="inlinecode">i &lt; 2</span>), tanda dibalik (<span class="inlinecode">&lt;</span> = descending), atau yang dicetak cuma satu elemen (<span class="inlinecode">a[2]</span>). Baca soal sampai <span class="inlinecode">printf</span> terakhir. Soal acak jenis ini (selalu beda tiap dibuka) ada di <b>Latihan → Bank Soal</b>, pilih topik Sorting atau Soal Kode.</div>`},
+
+ {t:"Library (Header File) C — stdio.h dkk", k:["<code>#include &lt;stdio.h&gt;</code> = pustaka standar input-output: printf, scanf, gets/fgets, puts, getchar, putchar", "<code>&lt;stdlib.h&gt;</code> malloc, free, rand, srand, atoi, abs, exit, system · <code>&lt;string.h&gt;</code> strlen, strcpy, strcat, strcmp", "<code>&lt;math.h&gt;</code> pow, sqrt, ceil, floor, fabs (hasil double) · <code>&lt;ctype.h&gt;</code> toupper, tolower, isdigit, isalpha", "<code>&lt;conio.h&gt;</code> getch, clrscr (bukan standar) · <code>&lt;time.h&gt;</code> time → srand(time(NULL))"], h:`
+  <p><b>Library</b> (pustaka) = kumpulan fungsi siap pakai. Supaya bisa dipakai, <b>header file</b>-nya dipanggil di baris paling atas dengan <span class="inlinecode">#include</span>. Baris ini diproses oleh <b>preprocessor</b> sebelum kompilasi.</p>
+  <pre class="code"><span class="kw">#include</span> &lt;stdio.h&gt;      <span class="cm">// &lt; &gt; = library standar bawaan compiler</span>
+<span class="kw">#include</span> "hitung.h"     <span class="cm">// " " = file header buatan sendiri (dicari di folder project dulu)</span></pre>
+  <div class="note">Lupa <span class="inlinecode">#include</span> yang sesuai → compiler protes fungsinya tidak dikenal (<i>implicit declaration</i>). Contoh: pakai <span class="inlinecode">strlen</span> tanpa <span class="inlinecode">&lt;string.h&gt;</span>.</div>
+
+  <h4>1. &lt;stdio.h&gt;: standard input output (paling wajib)</h4>
+  <div class="tblwrap"><table class="tbl"><tr><th>Fungsi</th><th>Kegunaan</th></tr>
+   <tr><td><code>printf()</code></td><td>Cetak ke layar dengan format (%d, %f, %c, %s)</td></tr>
+   <tr><td><code>scanf()</code></td><td>Baca input dengan format, pakai <code>&amp;</code> (kecuali string)</td></tr>
+   <tr><td><code>puts()</code></td><td>Cetak string + otomatis pindah baris</td></tr>
+   <tr><td><code>gets()</code> / <code>fgets()</code></td><td>Baca satu baris berspasi (gets sudah tidak aman, pakai fgets)</td></tr>
+   <tr><td><code>getchar()</code> / <code>putchar()</code></td><td>Baca / cetak <b>satu karakter</b></td></tr>
+   <tr><td><code>fopen, fclose, fprintf, fscanf</code></td><td>Operasi file</td></tr>
+  </table></div>
+
+  <h4>2. &lt;stdlib.h&gt;: standard library (utilitas umum)</h4>
+  <div class="tblwrap"><table class="tbl"><tr><th>Fungsi</th><th>Kegunaan</th></tr>
+   <tr><td><code>malloc()</code> / <code>calloc()</code> / <code>free()</code></td><td>Pesan &amp; lepas memori dinamis</td></tr>
+   <tr><td><code>rand()</code> / <code>srand()</code></td><td>Angka acak · <code>rand() % 10</code> → 0 sampai 9</td></tr>
+   <tr><td><code>atoi()</code> / <code>atof()</code></td><td>Ubah string ke int / double: <code>atoi("123")</code> = 123</td></tr>
+   <tr><td><code>abs()</code></td><td>Nilai mutlak <b>int</b>: <code>abs(-7)</code> = 7</td></tr>
+   <tr><td><code>exit()</code></td><td>Hentikan program</td></tr>
+   <tr><td><code>system("cls")</code> / <code>system("pause")</code></td><td>Jalankan perintah OS: bersihkan layar / tahan layar</td></tr>
+  </table></div>
+
+  <h4>3. &lt;string.h&gt;: olah string</h4>
+  <div class="tblwrap"><table class="tbl"><tr><th>Fungsi</th><th>Kegunaan</th><th>Contoh</th></tr>
+   <tr><td><code>strlen(s)</code></td><td>Panjang string (tanpa <code>\\0</code>)</td><td><code>strlen("Halo")</code> = 4</td></tr>
+   <tr><td><code>strcpy(a, b)</code></td><td>Salin b ke a (string tidak bisa pakai <code>=</code>)</td><td>a jadi sama dengan b</td></tr>
+   <tr><td><code>strcat(a, b)</code></td><td>Sambung b ke belakang a</td><td>"Halo" + "Dek" → "HaloDek"</td></tr>
+   <tr><td><code>strcmp(a, b)</code></td><td>Bandingkan: <b>0 kalau sama</b>, &lt;0 kalau a lebih dulu (abjad), &gt;0 kalau a belakangan</td><td><code>strcmp("abc","abc")</code> = 0</td></tr>
+   <tr><td><code>strncpy, strncat, strchr, strstr</code></td><td>Versi dengan batas n / cari karakter / cari kata</td><td></td></tr>
+  </table></div>
+
+  <h4>4. &lt;math.h&gt;: fungsi matematika (hasilnya <b>double</b>)</h4>
+  <div class="tblwrap"><table class="tbl"><tr><th>Fungsi</th><th>Kegunaan</th><th>Contoh</th></tr>
+   <tr><td><code>pow(x, y)</code></td><td>Pangkat x<sup>y</sup></td><td><code>pow(2, 3)</code> = 8.000000</td></tr>
+   <tr><td><code>sqrt(x)</code></td><td>Akar kuadrat</td><td><code>sqrt(25)</code> = 5.000000</td></tr>
+   <tr><td><code>ceil(x)</code></td><td>Bulatkan <b>ke atas</b></td><td><code>ceil(2.1)</code> = 3.0</td></tr>
+   <tr><td><code>floor(x)</code></td><td>Bulatkan <b>ke bawah</b></td><td><code>floor(2.9)</code> = 2.0</td></tr>
+   <tr><td><code>round(x)</code></td><td>Bulatkan ke terdekat</td><td><code>round(2.5)</code> = 3.0</td></tr>
+   <tr><td><code>fabs(x)</code></td><td>Nilai mutlak <b>pecahan</b></td><td><code>fabs(-2.5)</code> = 2.5</td></tr>
+   <tr><td><code>sin, cos, tan, log, log10, exp</code></td><td>Trigonometri (radian) &amp; logaritma</td><td><code>log10(100)</code> = 2.0</td></tr>
+  </table></div>
+  <div class="note">Karena hasilnya double, cetak pakai <span class="inlinecode">%f</span> / <span class="inlinecode">%.2f</span> / <span class="inlinecode">%lf</span>, bukan <span class="inlinecode">%d</span>. <span class="inlinecode">printf("%f", sqrt(16))</span> → <b>4.000000</b> (default 6 angka desimal). Di Linux kompilasinya perlu tambahan <span class="inlinecode">-lm</span>.</div>
+
+  <h4>5. &lt;ctype.h&gt;: cek &amp; ubah karakter</h4>
+  <div class="tblwrap"><table class="tbl"><tr><th>Fungsi</th><th>Kegunaan</th></tr>
+   <tr><td><code>toupper(c)</code> / <code>tolower(c)</code></td><td>Ubah ke huruf besar / kecil: <code>toupper('a')</code> = 'A'</td></tr>
+   <tr><td><code>isalpha(c)</code></td><td>Huruf? (bukan 0 = benar)</td></tr>
+   <tr><td><code>isdigit(c)</code></td><td>Angka '0'–'9'?</td></tr>
+   <tr><td><code>isupper / islower</code></td><td>Huruf besar / kecil?</td></tr>
+   <tr><td><code>isspace(c)</code></td><td>Spasi, tab, atau enter?</td></tr>
+  </table></div>
+
+  <h4>6. Library lain yang sering muncul</h4>
+  <div class="tblwrap"><table class="tbl"><tr><th>Header</th><th>Isi penting</th></tr>
+   <tr><td><code>&lt;conio.h&gt;</code></td><td><code>getch()</code> (baca 1 tombol tanpa Enter &amp; tanpa tampil), <code>getche()</code> (tampil), <code>clrscr()</code>. <b>Bukan standar C</b>, khas Turbo C / Windows.</td></tr>
+   <tr><td><code>&lt;time.h&gt;</code></td><td><code>time(NULL)</code>, <code>clock()</code>. Dipakai bareng <code>srand(time(NULL))</code> supaya angka acak beda tiap run.</td></tr>
+   <tr><td><code>&lt;stdbool.h&gt;</code></td><td>Tipe <code>bool</code>, <code>true</code>, <code>false</code> (C99).</td></tr>
+   <tr><td><code>&lt;limits.h&gt;</code> / <code>&lt;float.h&gt;</code></td><td>Batas tipe data: <code>INT_MAX</code> = 2147483647, <code>INT_MIN</code>.</td></tr>
+   <tr><td><code>&lt;iostream&gt;</code></td><td><b>Bukan C</b>, ini C++ (<code>cout</code>, <code>cin</code>). Jangan ketuker.</td></tr>
+  </table></div>
+
+  <h4>Contoh output yang sering ditanya</h4>
+  <pre class="code"><span class="kw">#include</span> &lt;stdio.h&gt;
+<span class="kw">#include</span> &lt;string.h&gt;
+<span class="kw">#include</span> &lt;math.h&gt;
+<span class="kw">#include</span> &lt;ctype.h&gt;
+
+<span class="kw">int</span> <span class="fn">main</span>() {
+    <span class="kw">char</span> s[20] = <span class="st">"Algoritma"</span>;
+    <span class="fn">printf</span>(<span class="st">"%d\\n"</span>, <span class="fn">strlen</span>(s));          <span class="cm">// 9</span>
+    <span class="fn">printf</span>(<span class="st">"%.0f\\n"</span>, <span class="fn">pow</span>(3, 2));        <span class="cm">// 9</span>
+    <span class="fn">printf</span>(<span class="st">"%.1f\\n"</span>, <span class="fn">floor</span>(7.8));      <span class="cm">// 7.0</span>
+    <span class="fn">printf</span>(<span class="st">"%c\\n"</span>, <span class="fn">toupper</span>(<span class="st">'b'</span>));       <span class="cm">// B</span>
+    <span class="fn">printf</span>(<span class="st">"%d\\n"</span>, <span class="fn">strcmp</span>(<span class="st">"ab"</span>, <span class="st">"ab"</span>)); <span class="cm">// 0</span>
+    <span class="kw">return</span> 0;
+}</pre>`}
 ];
 
 var ADS_BEDAH=[
@@ -622,7 +926,101 @@ var QUIZ_ADS=[
  {"q": "Enqueue 5, 7, 9 ke queue kosong, lalu dequeue 2 kali. Elemen di FRONT sekarang…", "o": ["9", "5", "7", "Kosong"], "a": 0, "e": "FIFO: 5 lalu 7 keluar → tinggal 9.", "t": 11},
  {"q": "Saat queue kosong, FRONT dan REAR menunjuk ke…", "o": ["NULL", "Indeks 0", "Elemen terakhir", "Elemen pertama"], "a": 0, "e": "Queue kosong → FRONT & REAR = NULL.", "t": 11},
  {"q": "Implementasi queue yang lebih fleksibel (tidak perlu tahu ukuran maksimal) memakai…", "o": ["Linked list", "Array statis", "Matriks", "Konstanta"], "a": 0, "e": "Array harus tahu ukuran maksimal. Linked list fleksibel.", "t": 11},
- {"q": "Struktur data dengan prinsip LIFO (Last In First Out) adalah…", "o": ["Stack", "Queue", "Array", "Binary search"], "a": 0, "e": "Stack = LIFO (seperti tumpukan piring). Queue = FIFO.", "t": 11}
+ {"q": "Struktur data dengan prinsip LIFO (Last In First Out) adalah…", "o": ["Stack", "Queue", "Array", "Binary search"], "a": 0, "e": "Stack = LIFO (seperti tumpukan piring). Queue = FIFO.", "t": 11},
+
+ /* Searching lengkap */
+ {q:"Sequential search mencari 3 pada {7, 3, 9, 3, 5} dengan kode <code>if (a[i] == x) return i;</code>. Nilai yang dikembalikan…",o:["1","3","2","−1"],a:0,e:"Loop dari indeks 0 dan langsung return di kemunculan PERTAMA: a[1] = 3 → return 1.",t:10},
+ {q:"Sequential search pada 100 data, kasus terburuk membutuhkan … perbandingan.",o:["100","50","7","1"],a:0,e:"Terburuk: data ada di paling akhir atau tidak ada → semua 100 dicek. O(n).",t:10},
+ {q:"Fungsi searching biasanya mengembalikan −1 jika data tidak ditemukan karena…",o:["−1 bukan indeks array yang valid (indeks mulai 0)","−1 artinya data ada di akhir","Wajib di bahasa C","Agar loop berhenti"],a:0,e:"Indeks valid 0 … n−1, jadi −1 aman dipakai sebagai tanda 'tidak ketemu'.",t:10},
+ {q:"Binary search pada {2, 5, 8, 12, 16, 23, 38, 56, 72, 91} mencari 23. Elemen tengah yang dibandingkan berturut-turut adalah…",o:["16, 56, 23","16, 23","12, 23","2, 5, 8, 12, 16, 23"],a:0,e:"bawah=0, atas=9 → tengah 4 (16) < 23 → bawah=5 · tengah (5+9)/2=7 (56) > 23 → atas=6 · tengah (5+6)/2=5 (23) ketemu.",t:10},
+ {q:"Lengkapi binary search: <code>else if (x &lt; a[tengah]) ______;</code>",o:["atas = tengah - 1","bawah = tengah + 1","atas = tengah + 1","tengah = tengah - 1"],a:0,e:"x lebih kecil → cari di bagian KIRI, jadi batas atas digeser: atas = tengah − 1.",t:10},
+ {q:"Kondisi perulangan binary search yang benar adalah…",o:["while (bawah <= atas)","while (bawah < n)","while (tengah != x)","while (atas > 0)"],a:0,e:"Pencarian lanjut selama rentang masih ada (bawah ≤ atas). Kalau bawah > atas → tidak ketemu.",t:10},
+ {q:"1000 data terurut dicari dengan binary search. Paling banyak sekitar … perbandingan.",o:["10","500","1000","100"],a:0,e:"Tiap langkah membuang setengah: 1000 → 500 → 250 → … → 1, sekitar 10 langkah (2¹⁰ = 1024). O(log n).",t:10},
+ {q:"Pada sequential search dengan sentinel, sentinel adalah…",o:["Data yang dicari, ditaruh di ujung array supaya loop pasti berhenti","Elemen tengah array","Indeks −1","Variabel penghitung"],a:0,e:"Sentinel = penjaga. Karena data pasti 'ketemu' di ujung, loop tak perlu cek i < n. Berhenti di posisi sentinel = tidak ketemu.",t:10},
+ {q:"Interpolation search cocok untuk data yang…",o:["Terurut dan nilainya tersebar merata","Belum terurut","Berisi huruf saja","Ukurannya sangat kecil"],a:0,e:"Posisi ditebak pakai proporsi nilai (seperti buka kamus). Butuh data terurut & merata.",t:10},
+ {q:"Jump search melompat sejauh … elemen tiap langkah.",o:["√n","n/2","1","log n"],a:0,e:"Lompat per √n sampai kelewatan, lalu sequential di blok tersebut → O(√n).",t:10},
+
+ /* Sorting dasar */
+ {q:"Data {5, 3, 8, 1, 4} diurutkan ascending dengan <b>bubble sort</b>. Hasil setelah pass pertama…",o:["3 5 1 4 8","1 3 8 5 4","3 5 8 1 4","1 3 4 5 8"],a:0,e:"5↔3 → 3 5 8 1 4 · 5,8 tetap · 8↔1 → 3 5 1 8 4 · 8↔4 → 3 5 1 4 8. Yang terbesar (8) sudah di kanan.",t:12},
+ {q:"Data {5, 3, 8, 1, 4} diurutkan ascending dengan <b>selection sort</b>. Hasil setelah pass pertama…",o:["1 3 8 5 4","3 5 1 4 8","3 5 8 1 4","1 5 3 8 4"],a:0,e:"Minimum seluruh array = 1 (indeks 3), ditukar dengan a[0] = 5 → 1 3 8 5 4.",t:12},
+ {q:"Data {5, 3, 8, 1, 4} diurutkan ascending dengan <b>insertion sort</b>. Hasil setelah nilai 1 (elemen ke-4) disisipkan…",o:["1 3 5 8 4","1 5 3 8 4","3 5 1 4 8","1 3 4 5 8"],a:0,e:"3 5 8 1 4 → 3 5 8 1 4 → 1 disisipkan paling depan (geser 8, 5, 3) → 1 3 5 8 4.",t:12},
+ {q:"Berapa kali pertukaran terjadi saat bubble sort ascending pada {5, 3, 8, 1, 4} sampai urut?",o:["6","4","3","10"],a:0,e:"Pass 1: 3 tukar · pass 2: 2 tukar · pass 3: 1 tukar · pass 4: 0 → total 6.",t:12},
+ {q:"Pada bubble sort ascending, setelah pass pertama selesai, elemen <b>terbesar</b> berada di…",o:["Paling kanan (indeks terakhir)","Paling kiri","Tengah array","Belum pasti"],a:0,e:"Elemen terbesar terus ditukar ke kanan ('menggelembung'), jadi setelah pass 1 pasti di indeks n−1.",t:12},
+ {q:"Untuk 6 data, bubble sort membutuhkan paling banyak … pass.",o:["5","6","3","36"],a:0,e:"n data → n − 1 pass. Setelah itu elemen terkecil otomatis tersisa di depan.",t:12},
+ {q:"Pada loop dalam bubble sort <code>for (j = 0; j &lt; n - 1 - i; j++)</code>, gunanya <code>- i</code> adalah…",o:["i elemen terakhir sudah di posisi akhir, tak perlu dibandingkan lagi","Supaya loop tidak pernah berhenti","Agar hasilnya descending","Untuk menukar elemen"],a:0,e:"Tiap pass mengunci satu elemen terbesar di kanan. Setelah i pass, i elemen terakhir sudah fix.",t:12},
+ {q:"Lengkapi kode tukar: <code>temp = a[j]; a[j] = a[j+1]; ______;</code>",o:["a[j+1] = temp","a[j] = temp","temp = a[j+1]","a[j+1] = a[j]"],a:0,e:"Tukar 3 langkah: simpan a[j] ke temp, timpa a[j] dengan a[j+1], lalu isi a[j+1] dengan temp.",t:12},
+ {q:"Agar bubble sort menghasilkan urutan <b>descending</b> (besar → kecil), kondisi <code>if</code> diubah menjadi…",o:["if (a[j] < a[j+1])","if (a[j] > a[j+1])","if (a[j] == a[j+1])","if (a[j] >= a[j+1])"],a:0,e:"Tukar kalau kiri LEBIH KECIL dari kanan → yang besar pindah ke kiri → descending.",t:12},
+ {q:"Lengkapi selection sort: <code>if (a[j] &lt; a[min]) ______;</code>",o:["min = j","min = a[j]","a[min] = a[j]","j = min"],a:0,e:"min menyimpan INDEKS elemen terkecil, bukan nilainya. Tukar baru dilakukan setelah loop dalam selesai.",t:12},
+ {q:"Pada insertion sort, setelah loop <code>while</code> (geser) selesai, baris yang tepat adalah…",o:["a[j + 1] = key;","a[j] = key;","a[i] = key;","key = a[j + 1];"],a:0,e:"Loop berhenti di j yang a[j] ≤ key (atau j = −1), jadi celah kosongnya ada di j + 1.",t:12},
+ {q:"Algoritma sorting yang cara kerjanya mirip menyusun kartu remi di tangan adalah…",o:["Insertion sort","Bubble sort","Selection sort","Quick sort"],a:0,e:"Ambil satu kartu, sisipkan ke posisi yang tepat di antara kartu yang sudah urut.",t:12},
+ {q:"Sorting yang setiap pass-nya paling banyak melakukan <b>satu</b> kali pertukaran adalah…",o:["Selection sort","Bubble sort","Insertion sort","Shell sort"],a:0,e:"Selection: cari minimum dulu, baru tukar sekali di akhir pass. Total tukar ≤ n − 1.",t:12},
+ {q:"Bubble sort versi <b>flag</b> (berhenti jika satu pass tidak ada pertukaran) pada data yang sudah urut membutuhkan…",o:["1 pass → O(n)","n − 1 pass","0 pass","n² pass"],a:0,e:"Pass pertama tidak ada tukar → flag tetap 'sudah urut' → berhenti. Best case O(n).",t:12},
+ {q:"Kompleksitas waktu rata-rata bubble, selection, dan insertion sort adalah…",o:["O(n²)","O(n log n)","O(log n)","O(n)"],a:0,e:"Ketiganya memakai dua loop bersarang → O(n²). Cocok untuk data kecil.",t:12},
+
+ /* Sorting lanjutan */
+ {q:"Shell sort dengan n = 8 memakai gap (jarak) berturut-turut…",o:["4, 2, 1","8, 4, 2","2, 4, 8","3, 2, 1"],a:0,e:"Gap awal n/2 = 4, lalu dibagi 2 terus: 2, lalu 1. Gap terakhir selalu 1.",t:13},
+ {q:"Shell sort ascending pada {8, 5, 3, 9, 1, 6, 2, 7}. Hasil setelah putaran gap 4…",o:["1 5 2 7 8 6 3 9","1 2 3 5 6 7 8 9","5 3 8 1 6 2 7 9","1 5 2 6 3 7 8 9"],a:0,e:"Pasangan berjarak 4: (8,1) tukar · (5,6) tetap · (3,2) tukar · (9,7) tukar → 1 5 2 7 8 6 3 9.",t:13},
+ {q:"Shell sort merupakan pengembangan dari…",o:["Insertion sort","Bubble sort","Merge sort","Binary search"],a:0,e:"Shell sort = insertion sort dengan jarak (gap) yang makin mengecil sampai 1.",t:13},
+ {q:"Prinsip yang dipakai merge sort dan quick sort adalah…",o:["Divide and conquer","Brute force","Greedy","Sequential"],a:0,e:"Masalah dibagi jadi bagian kecil, diselesaikan, lalu digabung.",t:13},
+ {q:"Merge sort: menggabungkan {3, 27, 38} dan {9, 10, 43} menghasilkan…",o:["3 9 10 27 38 43","3 27 38 9 10 43","9 10 43 3 27 38","3 9 27 10 38 43"],a:0,e:"Merge: bandingkan elemen terdepan kedua bagian, ambil yang lebih kecil, ulangi.",t:13},
+ {q:"Kelemahan utama merge sort adalah…",o:["Butuh memori tambahan (array sementara)","Selalu O(n²)","Tidak bisa mengurutkan angka negatif","Tidak stabil"],a:0,e:"Merge sort selalu O(n log n) dan stabil, tapi butuh array bantu untuk proses penggabungan.",t:13},
+ {q:"Quick sort pada {7, 2, 9, 4, 3} dengan pivot = 3 (elemen terakhir). Hasil setelah partisi pertama…",o:["2 3 9 4 7","2 3 4 7 9","3 2 9 4 7","7 2 9 4 3"],a:0,e:"Yang ≤ 3 (cuma 2) ke kiri, pivot ditaruh setelahnya, sisanya di kanan: 2 3 9 4 7. Bagian kanan belum urut.",t:13},
+ {q:"Quick sort mencapai kasus terburuk O(n²) ketika…",o:["Pivot selalu elemen terkecil/terbesar (mis. data sudah urut dan pivot di ujung)","Data acak","Pivot elemen tengah","Data sedikit"],a:0,e:"Partisi jadi tidak seimbang (0 dan n−1 elemen), sehingga butuh n tingkat rekursi.",t:13},
+ {q:"Algoritma sorting berikut yang <b>tidak stabil</b> adalah…",o:["Selection sort","Bubble sort","Insertion sort","Merge sort"],a:0,e:"Tidak stabil: selection, shell, quick, heap. Stabil: bubble, insertion, merge.",t:13},
+ {q:"Algoritma sorting yang kompleksitasnya <b>selalu</b> O(n log n) (terbaik, rata-rata, terburuk) adalah…",o:["Merge sort","Quick sort","Bubble sort","Insertion sort"],a:0,e:"Merge selalu membagi dua sama besar → O(n log n). Quick bisa jatuh ke O(n²).",t:13},
+ {q:"Sorting yang membandingkan elemen ke-i dengan <b>semua</b> elemen sesudahnya lalu menukar jika salah urutan disebut…",o:["Exchange sort","Insertion sort","Merge sort","Shell sort"],a:0,e:"Exchange sort mirip bubble, bedanya pembanding tetap di posisi i (bukan tetangga).",t:13},
+
+ /* Soal kode: tebak output & isi yang kosong */
+ {q:"Output program berikut adalah…<pre class=\"code\">int a[5] = {4, 2, 7, 1, 3};\nint i, j, temp;\nfor (i = 0; i &lt; 2; i++)\n    for (j = 0; j &lt; 4 - i; j++)\n        if (a[j] &gt; a[j+1]) {\n            temp = a[j]; a[j] = a[j+1]; a[j+1] = temp;\n        }\nfor (i = 0; i &lt; 5; i++) printf(\"%d \", a[i]);</pre>",o:["2 1 3 4 7","1 2 3 4 7","2 4 1 3 7","7 4 3 2 1"],a:0,e:"Loop luar cuma 2 pass. Pass 1 → 2 4 1 3 7. Pass 2 → 2 1 3 4 7. Belum urut sempurna.",t:14},
+ {q:"Output program berikut adalah…<pre class=\"code\">int a[5] = {3, 9, 4, 1, 6};\nint i, j, temp;\nfor (i = 0; i &lt; 4; i++)\n    for (j = 0; j &lt; 4 - i; j++)\n        if (a[j] &lt; a[j+1]) {\n            temp = a[j]; a[j] = a[j+1]; a[j+1] = temp;\n        }\nprintf(\"%d %d\", a[0], a[4]);</pre>",o:["9 1","1 9","3 6","9 6"],a:0,e:"Kondisi < → descending: 9 6 4 3 1. a[0] = 9, a[4] = 1.",t:14},
+ {q:"Lengkapi kode agar menjadi bubble sort ascending yang benar:<pre class=\"code\">for (i = 0; i &lt; n - 1; i++)\n    for (j = 0; j &lt; ______; j++)\n        if (a[j] &gt; a[j+1]) { ... }</pre>",o:["n - 1 - i","n","i","n + 1"],a:0,e:"j + 1 harus tetap < n dan i elemen terakhir sudah fix → j < n − 1 − i. Pakai n akan mengakses a[n] (di luar batas).",t:14},
+ {q:"Lengkapi insertion sort:<pre class=\"code\">key = a[i];\nj = i - 1;\nwhile (j &gt;= 0 &amp;&amp; ______) {\n    a[j + 1] = a[j];\n    j--;\n}\na[j + 1] = key;</pre>",o:["a[j] > key","a[j] < key","a[i] > key","j > key"],a:0,e:"Geser ke kanan selama elemen kiri LEBIH BESAR dari key (ascending).",t:14},
+ {q:"Lengkapi binary search:<pre class=\"code\">while (bawah &lt;= atas) {\n    tengah = ______;\n    ...\n}</pre>",o:["(bawah + atas) / 2","(atas - bawah) * 2","bawah + atas","n / 2"],a:0,e:"Indeks tengah = (bawah + atas) / 2, pembagian int dibulatkan ke bawah.",t:14},
+ {q:"Output program berikut adalah…<pre class=\"code\">int a[6] = {12, 7, 25, 7, 3, 18};\nint i, pos = -1;\nfor (i = 0; i &lt; 6; i++)\n    if (a[i] == 7) pos = i;\nprintf(\"%d\", pos);</pre>",o:["3","1","−1","7"],a:0,e:"Tidak ada break/return, jadi pos terus ditimpa: i=1 → pos=1, i=3 → pos=3. Yang tersisa kemunculan TERAKHIR = 3.",t:14},
+ {q:"Output program berikut adalah…<pre class=\"code\">int a[5] = {6, 2, 9, 4, 5};\nint i, j, min, temp;\nfor (i = 0; i &lt; 2; i++) {\n    min = i;\n    for (j = i + 1; j &lt; 5; j++)\n        if (a[j] &lt; a[min]) min = j;\n    temp = a[i]; a[i] = a[min]; a[min] = temp;\n}\nfor (i = 0; i &lt; 5; i++) printf(\"%d \", a[i]);</pre>",o:["2 4 9 6 5","2 4 5 6 9","2 6 9 4 5","2 9 6 4 5"],a:0,e:"Selection 2 pass. Pass 1: min 2 ↔ 6 → 2 6 9 4 5. Pass 2: min sisa = 4 ↔ 6 → 2 4 9 6 5.",t:14},
+ {q:"Pada soal 'isi kode kosong' selection sort, baris yang tepat di awal setiap pass (sebelum loop dalam) adalah…",o:["min = i;","min = 0;","min = a[i];","min = n;"],a:0,e:"Tiap pass, anggap dulu elemen di posisi i yang terkecil (simpan indeksnya).",t:14},
+
+ /* Library / header file C */
+ {q:"Fungsi printf dan scanf berasal dari header file…",o:["stdio.h","stdlib.h","string.h","conio.h"],a:0,e:"stdio.h = standard input output: printf, scanf, puts, gets/fgets, getchar, putchar.",t:15},
+ {q:"Perbedaan <code>#include &lt;stdio.h&gt;</code> dan <code>#include \"hitung.h\"</code> adalah…",o:["< > untuk library standar, \" \" untuk header buatan sendiri","Tidak ada bedanya","< > untuk C++, \" \" untuk C","\" \" hanya untuk stdio"],a:0,e:"< > dicari di folder library compiler; \" \" dicari di folder project dulu (file buatan sendiri).",t:15},
+ {q:"Fungsi untuk menghitung panjang string ada di header…",o:["string.h","stdio.h","math.h","ctype.h"],a:0,e:"strlen, strcpy, strcat, strcmp ada di string.h.",t:15},
+ {q:"<code>printf(\"%d\", strlen(\"Halo\"));</code> mencetak…",o:["4","5","3","Halo"],a:0,e:"strlen menghitung karakter tanpa '\\0' penutup → H-a-l-o = 4.",t:15},
+ {q:"<code>strcmp(\"abc\", \"abc\")</code> menghasilkan…",o:["0","1","−1","true"],a:0,e:"strcmp mengembalikan 0 kalau kedua string SAMA. Bukan 1!",t:15},
+ {q:"Untuk menyalin string b ke a, cara yang benar adalah…",o:["strcpy(a, b);","a = b;","strcat(a, b);","strcmp(a, b);"],a:0,e:"Array string tidak bisa di-assign dengan =. Pakai strcpy dari string.h. strcat = menyambung.",t:15},
+ {q:"Fungsi pow, sqrt, ceil, dan floor berasal dari header…",o:["math.h","stdlib.h","stdio.h","ctype.h"],a:0,e:"math.h. Semua hasilnya bertipe double.",t:15},
+ {q:"<code>printf(\"%f\", sqrt(16));</code> mencetak…",o:["4.000000","4","16.000000","4.0"],a:0,e:"sqrt menghasilkan double; %f default 6 angka di belakang koma → 4.000000.",t:15},
+ {q:"<code>printf(\"%.0f\", pow(2, 5));</code> mencetak…",o:["32","10","25","7"],a:0,e:"pow(2, 5) = 2⁵ = 32 (double). %.0f = tanpa angka desimal.",t:15},
+ {q:"Hasil <code>ceil(4.2)</code> dan <code>floor(4.8)</code> berturut-turut…",o:["5.0 dan 4.0","4.0 dan 5.0","4.0 dan 4.0","5.0 dan 5.0"],a:0,e:"ceil = bulat ke ATAS (4.2 → 5). floor = bulat ke BAWAH (4.8 → 4).",t:15},
+ {q:"Fungsi toupper, tolower, isdigit, dan isalpha ada di header…",o:["ctype.h","string.h","stdlib.h","math.h"],a:0,e:"ctype.h = cek & ubah satu karakter.",t:15},
+ {q:"<code>printf(\"%c\", toupper('g'));</code> mencetak…",o:["G","g","71","error"],a:0,e:"toupper mengubah huruf kecil jadi besar → 'G'.",t:15},
+ {q:"Fungsi malloc, free, rand, atoi, dan exit berasal dari header…",o:["stdlib.h","stdio.h","string.h","time.h"],a:0,e:"stdlib.h = standard library: memori dinamis, angka acak, konversi string, exit, system.",t:15},
+ {q:"<code>rand() % 6</code> menghasilkan angka acak dalam rentang…",o:["0 sampai 5","1 sampai 6","0 sampai 6","1 sampai 5"],a:0,e:"Sisa bagi 6 selalu 0–5. Untuk 1–6 pakai rand() % 6 + 1.",t:15},
+ {q:"<code>atoi(\"250\") + 5</code> bernilai…",o:["255","2505","\"2505\"","error"],a:0,e:"atoi mengubah string \"250\" jadi int 250, lalu + 5 = 255.",t:15},
+ {q:"Agar angka acak dari rand() berbeda setiap program dijalankan, dipakai…",o:["srand(time(NULL)) dengan time.h","system(\"cls\")","getch()","strlen()"],a:0,e:"srand menanam seed; time(NULL) dari time.h membuat seed beda tiap detik.",t:15},
+ {q:"Fungsi getch() dan clrscr() berasal dari header…",o:["conio.h","stdio.h","stdlib.h","string.h"],a:0,e:"conio.h (console I/O), khas Turbo C / Windows, BUKAN bagian standar C.",t:15},
+ {q:"Fungsi untuk membaca SATU karakter dari keyboard yang ada di stdio.h adalah…",o:["getchar()","getch()","gets()","puts()"],a:0,e:"getchar() dari stdio.h (perlu Enter). getch() dari conio.h (tanpa Enter, tidak standar).",t:15},
+ {q:"Header <code>&lt;iostream&gt;</code> (cout, cin) adalah milik bahasa…",o:["C++","C","Java","Python"],a:0,e:"iostream itu C++. Di C, input-output pakai stdio.h (printf, scanf).",t:15},
+ {q:"Baris <code>#include</code> diproses pada tahap…",o:["Preprocessor (sebelum kompilasi)","Linker","Saat program dijalankan","Setelah return 0"],a:0,e:"Alur: kode.c → preprocessor (proses #include & #define) → compiler → linker → program.",t:15},
+
+ /* Teori jenis algoritma & analogi */
+ {q:"Sorting yang mengurutkan dari nilai terbesar ke terkecil disebut…",o:["Descending","Ascending","Searching","Merging"],a:0,e:"Descending = besar → kecil. Ascending = kecil → besar.",t:12},
+ {q:"Yang dimaksud satu <b>pass</b> pada sorting adalah…",o:["Satu putaran penuh loop luar (satu kali menelusuri data)","Satu kali pertukaran","Satu elemen array","Satu kali printf"],a:0,e:"Pass = satu putaran loop luar. Dalam satu pass bisa terjadi beberapa pertukaran.",t:12},
+ {q:"Sorting <b>internal</b> berbeda dengan sorting <b>eksternal</b> karena…",o:["Internal: semua data muat di memori utama (RAM); eksternal: data terlalu besar, sebagian di media penyimpanan","Internal lebih lambat","Eksternal hanya untuk huruf","Tidak ada bedanya"],a:0,e:"Bubble/selection/insertion pada array = sorting internal. Data raksasa di disk butuh sorting eksternal (biasanya berbasis merge).",t:12},
+ {q:"Algoritma searching yang WAJIB memakai data terurut adalah…",o:["Binary search","Sequential search","Sentinel search","Semua searching"],a:0,e:"Binary (juga interpolation & jump) butuh data terurut. Sequential tidak.",t:10},
+ {q:"Kelompok algoritma berikut yang semuanya termasuk algoritma <b>sorting</b> adalah…",o:["Bubble, Selection, Insertion, Shell","Sequential, Binary, Bubble, Queue","Binary, Interpolation, Jump","Stack, Queue, Array"],a:0,e:"Sorting: bubble, selection, insertion, shell, merge, quick, heap. Searching: sequential, binary, interpolation, jump.",t:13},
+ {q:"Kelompok algoritma berikut yang semuanya termasuk algoritma <b>searching</b> adalah…",o:["Sequential, Binary, Interpolation, Jump","Bubble, Selection, Merge","Quick, Shell, Heap","Push, Pop, Enqueue"],a:0,e:"Searching mencari posisi data; sorting mengurutkan data.",t:10},
+ {q:"Perbedaan utama sorting dan searching adalah…",o:["Sorting mengurutkan data; searching mencari letak data","Sorting mencari data; searching mengurutkan","Keduanya sama","Searching hanya untuk huruf"],a:0,e:"Sorting = mengurutkan. Searching = mencari. Data yang sudah di-sort bisa dicari pakai binary search yang lebih cepat.",t:10},
+ {q:"Algoritma sorting yang <b>paling sederhana</b> dan biasanya diajarkan pertama, dengan cara menukar elemen bersebelahan, adalah…",o:["Bubble sort","Quick sort","Merge sort","Heap sort"],a:0,e:"Bubble sort: bandingkan & tukar tetangga.",t:12},
+ {q:"Sorting yang membagi data menjadi dua bagian berdasarkan sebuah <b>pivot</b> adalah…",o:["Quick sort","Merge sort","Selection sort","Shell sort"],a:0,e:"Quick sort: elemen < pivot di kiri, > pivot di kanan.",t:13},
+ {q:"Sorting yang memakai <b>jarak/gap</b> yang makin mengecil adalah…",o:["Shell sort","Bubble sort","Merge sort","Quick sort"],a:0,e:"Shell sort: gap n/2, n/4, …, 1.",t:13},
+ {q:"Analogi “menyusun kartu remi di tangan satu per satu” paling tepat untuk…",o:["Insertion sort","Bubble sort","Binary search","Queue"],a:0,e:"Ambil kartu, selipkan ke posisi yang pas di bagian yang sudah urut.",t:12},
+ {q:"Analogi “mencari kata di kamus dengan membuka halaman tengah lebih dulu” paling tepat untuk…",o:["Binary search","Sequential search","Selection sort","Stack"],a:0,e:"Buka tengah, buang setengah yang tidak mungkin, ulangi.",t:10},
+ {q:"Analogi “gelembung besar naik ke permukaan air” dipakai untuk menjelaskan…",o:["Bubble sort","Quick sort","Queue","Merge sort"],a:0,e:"Elemen terbesar 'menggelembung' ke ujung array tiap pass.",t:12},
+ {q:"Analogi “tiap putaran memilih murid paling pendek lalu menaruhnya di barisan depan” paling tepat untuk…",o:["Selection sort","Insertion sort","Bubble sort","Shell sort"],a:0,e:"Pilih (select) minimum, taruh di depan.",t:12},
+ {q:"Analogi “tumpukan kertas dibagi dua terus sampai selembar, lalu digabung sambil diurutkan” paling tepat untuk…",o:["Merge sort","Quick sort","Bubble sort","Binary search"],a:0,e:"Divide (bagi dua) lalu merge (gabung terurut).",t:13},
+ {q:"Analogi “mencari kunci di laci dengan memeriksa barang satu per satu dari depan” paling tepat untuk…",o:["Sequential search","Binary search","Insertion sort","Stack"],a:0,e:"Periksa berurutan dari awal sampai ketemu.",t:10},
+ {q:"Analogi “antre di loket: yang datang duluan dilayani duluan” menggambarkan…",o:["Queue (FIFO)","Stack (LIFO)","Binary search","Bubble sort"],a:0,e:"First In First Out.",t:11},
+ {q:"Analogi “tombol Undo: perubahan terakhir dibatalkan duluan” menggambarkan…",o:["Stack (LIFO)","Queue (FIFO)","Sequential search","Merge sort"],a:0,e:"Last In First Out.",t:11}
 ];
 
 /* ================= FLASHCARDS ================= */
@@ -647,7 +1045,19 @@ var FLASHCARDS=[
  {tag:"ADS · Array",q:"Indeks array mulai dari berapa & aturan tipe?",a:"Mulai dari 0; semua elemen harus bertipe data sama. a[5] → indeks 0–4."},
  {tag:"ADS · Searching",q:"Sequential vs Binary search?",a:"Sequential: cek satu-satu (lambat). Binary: bagi dua, tengah=(bawah+atas)/2, data HARUS terurut (cepat)."},
  {tag:"ADS · Struktur Data",q:"Queue vs Stack?",a:"Queue = FIFO (tambah di REAR, hapus di FRONT). Stack = LIFO."},
- {tag:"ADS · Fungsi",q:"Parameter vs return value & default tipe?",a:"Parameter/argumen = masukan; return value = keluaran. Tipe default fungsi = int."}
+ {tag:"ADS · Fungsi",q:"Parameter vs return value & default tipe?",a:"Parameter/argumen = masukan; return value = keluaran. Tipe default fungsi = int."},
+ {tag:"ADS · Searching",q:"Binary search: geser batasnya gimana?",a:"x < a[tengah] → atas = tengah − 1 · x > a[tengah] → bawah = tengah + 1 · loop while (bawah <= atas) · tidak ketemu → return −1."},
+ {tag:"ADS · Searching",q:"Kompleksitas metode searching?",a:"Sequential O(n) · Binary O(log n) · Jump O(√n) · Interpolation O(log log n) rata-rata (data urut & merata)."},
+ {tag:"ADS · Sorting",q:"Bubble vs Selection vs Insertion (idenya)?",a:"Bubble: tukar tetangga, terbesar ke kanan · Selection: cari minimum, tukar ke depan · Insertion: sisipkan key ke bagian kiri yang sudah urut."},
+ {tag:"ADS · Sorting",q:"Hasil pass 1 dari {5, 3, 8, 1, 4}?",a:"Bubble: 3 5 1 4 8 · Selection: 1 3 8 5 4 · Insertion: 3 5 8 1 4."},
+ {tag:"ADS · Sorting",q:"Shell sort: gap untuk n = 8?",a:"4 → 2 → 1 (n/2, dibagi 2 terus). Pengembangan insertion sort, oleh Donald Shell."},
+ {tag:"ADS · Sorting",q:"Merge sort vs Quick sort?",a:"Keduanya divide & conquer. Merge: bagi dua + gabung, selalu O(n log n), stabil, butuh memori. Quick: pivot + partisi, rata-rata O(n log n), terburuk O(n²)."},
+ {tag:"ADS · Sorting",q:"Kompleksitas & stabil/tidak?",a:"O(n²): bubble, selection, insertion · O(n log n): merge, quick (rata-rata), heap. Tidak stabil: selection, shell, quick, heap."},
+ {tag:"ADS · Sorting",q:"Kode swap & tanda ascending/descending?",a:"temp = a[j]; a[j] = a[j+1]; a[j+1] = temp; · a[j] > a[j+1] = ascending, a[j] < a[j+1] = descending."},
+ {tag:"ADS · Library",q:"stdio.h vs stdlib.h?",a:"stdio.h: printf, scanf, puts, gets/fgets, getchar, putchar, file · stdlib.h: malloc, free, rand, srand, atoi, abs, exit, system."},
+ {tag:"ADS · Library",q:"string.h: 4 fungsi utama?",a:"strlen (panjang, tanpa \\0) · strcpy (salin) · strcat (sambung) · strcmp (bandingkan, 0 = sama)."},
+ {tag:"ADS · Library",q:"math.h & ctype.h?",a:"math.h: pow, sqrt, ceil (atas), floor (bawah), round, fabs → hasil double · ctype.h: toupper, tolower, isdigit, isalpha, isspace."},
+ {tag:"ADS · Library",q:"conio.h, time.h, < > vs \" \"?",a:"conio.h: getch, getche, clrscr (bukan standar) · time.h: time(NULL) untuk srand · < > = library standar, \" \" = header buatan sendiri."}
 ];
 
 var HITUNG=[
@@ -915,13 +1325,37 @@ var KISI_ADS=[
    "Prototype & tipe default (int)"
  ]},
  {t:"Searching", items:[
-   "Sequential / linear search (cek satu-satu)",
-   "Binary search (syarat terurut, rumus tengah)"
+   "Sequential / linear search (cek satu-satu, return −1 kalau tidak ketemu)",
+   "Sequential dengan sentinel",
+   "Binary search (syarat terurut, rumus tengah, geser bawah/atas)",
+   "Interpolation &amp; jump search (ide saja)",
+   "Kompleksitas: O(n) vs O(log n)"
  ]},
  {t:"Queue (Antrian)", items:[
    "Prinsip FIFO, FRONT & REAR",
    "Operasi enqueue (insert) & dequeue (delete)",
    "Queue vs Stack (FIFO vs LIFO)"
+ ]},
+ {t:"Sorting", items:[
+   "Bubble sort: tukar tetangga, hasil per pass",
+   "Selection sort: cari minimum, tukar ke depan",
+   "Insertion sort: key, geser, sisipkan",
+   "Shell sort: gap n/2 → 1",
+   "Merge sort &amp; quick sort (divide and conquer, pivot)",
+   "Tabel kompleksitas &amp; stabil/tidak stabil"
+ ]},
+ {t:"Soal Kode", items:[
+   "Tebak output program (trace table)",
+   "Isi kode yang kosong (swap, batas loop, kondisi if/while)",
+   "Ascending vs descending (&gt; vs &lt;)"
+ ]},
+ {t:"Library / Header File", items:[
+   "<code>#include</code>, &lt; &gt; vs \" \", diproses preprocessor",
+   "stdio.h: printf, scanf, puts, gets/fgets, getchar, putchar",
+   "stdlib.h: malloc, free, rand, srand, atoi, abs, exit, system",
+   "string.h: strlen, strcpy, strcat, strcmp",
+   "math.h: pow, sqrt, ceil, floor, round, fabs (double)",
+   "ctype.h: toupper, tolower, isdigit, isalpha · conio.h: getch, clrscr · time.h"
  ]}
 ];
 

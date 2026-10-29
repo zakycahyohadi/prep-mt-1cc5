@@ -37,7 +37,7 @@ const checkN=(subj,t)=>Math.min(CHECK_N,qOfTopic(subj,t).length);
 const CALC_RE=/[₀-₉]|biner|desimal|heksa|oktal|komplemen|BCD|detik|efisiensi|pernyataan tunggal|\d{3,}/i;
 const HEAVY_RE=/BCD|18 − 7|bps|fisiensi|switch\(|Tugas 80|umur 3\/10|Berapa elemen|habis dibagi 3/;
 ALLQ.forEach(q=>{
-  q.kind=q.subj==="iit"?(CALC_RE.test(q.q)?"calc":"konsep"):(/<code>|printf|scanf|for\(/.test(q.q)?"code":"konsep");
+  q.kind=q.subj==="iit"?(CALC_RE.test(q.q)?"calc":"konsep"):(/<code>|<pre|printf|scanf|for\(/.test(q.q)?"code":"konsep");
   q.w=q.w||(HEAVY_RE.test(q.q)?3:q.kind==="konsep"?1:2);
 });
 const KINDS={all:"Semua jenis",calc:"🧮 Hitungan (IIT)",code:"💻 Kode & output (ADS)",konsep:"📖 Konsep & hafalan"};
@@ -54,7 +54,7 @@ const STAGES=[
    items:IIT_TOPICS.map((t,i)=>({title:t.t,html:t.h,keys:t.k,subj:"iit",topic:i}))},
   {id:"hitung",cls:"s-hitung",ic:"🧮",name:"Lab Hitung",mins:50,desc:"Konversi basis, komplemen-2, BCD, tabel kebenaran, waktu unduh, trace table. Pelan-pelan, baris per baris.",
    items:HITUNG.map((t,i)=>({title:t.t,html:t.h,gen:HITUNG_GEN[i]}))},
-  {id:"ads",cls:"s-ads",ic:"🧩",name:"Algorithm & Data Structure",mins:90,desc:"Algoritma & flowchart, dasar bahasa C, operator, percabangan, perulangan, array, fungsi, searching, queue.",
+  {id:"ads",cls:"s-ads",ic:"🧩",name:"Algorithm & Data Structure",mins:150,desc:"Algoritma & flowchart, dasar bahasa C, operator, percabangan, perulangan, array, fungsi, searching, queue, sorting, soal kode isian, library C.",
    items:ADS_TOPICS.map((t,i)=>({title:t.t,html:t.h,keys:t.k,subj:"ads",topic:i}))},
   {id:"bedah",cls:"s-bedah",ic:"🔍",name:"Bedah Soal HOTS",mins:30,desc:"5 soal HOTS dari quiz dosen dikupas tuntas: flowchart, tipe data, studi kasus, trace, nilai akhir.",
    items:ADS_BEDAH.map(t=>({title:t.t,html:t.h}))}
@@ -509,7 +509,8 @@ function renderConv(body){
 /* ================= SIMULASI ================= */
 const PACKS=[
   {id:"iit",name:"MT IIT",ic:"💡",cls:"s-iit",n:30,min:45,desc:"30 soal: 18 hitungan (konversi, komplemen, BCD, logika, data) + 12 konsep dari ketujuh topik."},
-  {id:"ads",name:"MT ADS",ic:"🧩",cls:"s-ads",n:30,min:45,desc:"30 soal: 18 baca kode & tebak output + 12 konsep dari 12 topik."},
+  {id:"ads",name:"MT ADS",ic:"🧩",cls:"s-ads",n:30,min:45,desc:"30 soal: 18 baca kode & tebak output + 12 konsep dari semua topik ADS."},
+  {id:"remed",name:"Remedial ADS",ic:"🎯",cls:"s-ads",n:30,min:45,desc:"30 soal fokus kisi-kisi remedial: sorting, searching, isi kode kosong, tebak output, analogi, library C."},
   {id:"mix",name:"Full MT (IIT + ADS)",ic:"🔥",cls:"s-bedah",n:60,min:90,desc:"30 IIT + 30 ADS sekaligus. Latihan ketahanan paling mirip hari H."}
 ];
 let SIM=null,simTick=null;
@@ -530,9 +531,12 @@ function take(subj,n,filter){
   for(const t of shuffle(by.map((_,i)=>i)))if(left>0&&alloc[t]<by[t].length){alloc[t]++;left--;}
   return by.flatMap((b,t)=>shuffle(b.slice(0,alloc[t])));
 }
-/* Komposisi paket MT: IIT berat hitungan, ADS berat kode → output. */
+/* Komposisi paket MT: IIT berat hitungan, ADS berat kode → output. Remedial = topik searching, sorting, soal kode, library. */
+const REMED_T=[10,12,13,14,15];
 function simItems(subj){
   if(subj==="iit")return shuffle(genMany(GENS.iit,18).concat(take("iit",12,q=>q.kind!=="calc")));
+  if(subj==="remed"){const F=q=>REMED_T.includes(q.t),st=shuffle(ALLQ.filter(q=>q.subj==="ads"&&F(q)));
+    return shuffle(genMany(GENS.ads.filter(F),14).concat(st.filter(q=>q.kind==="code").slice(0,8),st.filter(q=>q.kind!=="code").slice(0,8)));}
   const sc=shuffle(ALLQ.filter(q=>q.subj==="ads"&&q.kind==="code")).slice(0,6);
   return shuffle(genMany(GENS.ads,12).concat(sc,take("ads",12,q=>q.kind!=="code")));
 }
@@ -682,6 +686,10 @@ const TRAPS=[
   "<b>Waktu unduh</b>: lupa ×8 (Byte → bit) = jawaban salah.",
   "<b>Binary search</b> hanya untuk data yang <b>sudah terurut</b>.",
   "<b>Indeks array mulai 0</b>: <code>a[5]</code> → 0–4.",
+  "<b>Bubble pass 1</b>: yang terbesar sudah di kanan · <b>Selection pass 1</b>: yang terkecil sudah di kiri · <b>Insertion</b>: cuma bagian kiri yang berubah.",
+  "<b>Bubble</b> <code>&gt;</code> = ascending, <code>&lt;</code> = descending. Cek juga batas loop luar: kalau cuma 2 pass, array belum tentu urut.",
+  "<b>Selection</b>: <code>min = j</code> (indeks), bukan <code>min = a[j]</code>. <b>Insertion</b>: sisip di <code>a[j+1]</code>.",
+  "<b>strcmp = 0 artinya sama</b>. <code>strlen(\"Halo\")</code> = 4 (tanpa \\0). Fungsi math.h hasilnya double → cetak pakai %f.",
   "<b>Flowchart</b>: input pakai jajar genjang, kondisi pakai belah ketupat, harus ada Selesai.",
   "<b>NIM disimpan sebagai string</b>, bukan int (angka 0 di depan hilang).",
   "<b>switch tanpa break</b> → fall-through ke case berikutnya.",

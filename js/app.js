@@ -510,7 +510,7 @@ function renderConv(body){
 const PACKS=[
   {id:"iit",name:"MT IIT",ic:"💡",cls:"s-iit",n:30,min:45,desc:"30 soal: 18 hitungan (konversi, komplemen, BCD, logika, data) + 12 konsep dari ketujuh topik."},
   {id:"ads",name:"MT ADS",ic:"🧩",cls:"s-ads",n:30,min:45,desc:"30 soal: 18 baca kode & tebak output + 12 konsep dari semua topik ADS."},
-  {id:"remed",name:"Remedial ADS",ic:"🎯",cls:"s-ads",n:30,min:45,desc:"30 soal fokus kisi-kisi remedial: sorting, searching, isi kode kosong, tebak output, analogi, library C."},
+  {id:"remed",name:"Remedial ADS",ic:"🎯",cls:"s-ads",n:30,min:45,desc:"30 soal fokus kisi-kisi remedial: bubble & sorting lain, searching, isi kode kosong, tebak output, urutan langkah, sintaks, analogi, library C."},
   {id:"mix",name:"Full MT (IIT + ADS)",ic:"🔥",cls:"s-bedah",n:60,min:90,desc:"30 IIT + 30 ADS sekaligus. Latihan ketahanan paling mirip hari H."}
 ];
 let SIM=null,simTick=null;
@@ -532,7 +532,7 @@ function take(subj,n,filter){
   return by.flatMap((b,t)=>shuffle(b.slice(0,alloc[t])));
 }
 /* Komposisi paket MT: IIT berat hitungan, ADS berat kode → output. Remedial = topik searching, sorting, soal kode, library. */
-const REMED_T=[10,12,13,14,15];
+const REMED_T=[1,10,12,13,14,15,16];
 function simItems(subj){
   if(subj==="iit")return shuffle(genMany(GENS.iit,18).concat(take("iit",12,q=>q.kind!=="calc")));
   if(subj==="remed"){const F=q=>REMED_T.includes(q.t),st=shuffle(ALLQ.filter(q=>q.subj==="ads"&&F(q)));

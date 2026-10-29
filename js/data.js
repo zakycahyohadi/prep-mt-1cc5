@@ -390,6 +390,7 @@ contoh[4] = 63;    <span class="cm">// ubah elemen indeks 4</span></pre>
                 a[j + 1] = temp;
             }
 }</pre>
+  <div class="note"><b>Mau bubble sort lebih detail?</b> Buka langkah <b>“Bubble Sort — Lengkap Step by Step”</b> (paling bawah daftar ADS): trace tiap perbandingan, versi dari depan &amp; dari belakang, rumus, dan trik ngerjain soal.</div>
   <div class="note">Total tukar di contoh: 3 + 2 + 1 = <b>6 kali</b>. Versi pakai <b>flag</b> (berhenti kalau satu pass tidak ada tukar) membuat data yang sudah urut cukup 1 pass → best case O(n).</div>
 
   <h4>2. Selection Sort: pilih yang terkecil</h4>
@@ -629,7 +630,88 @@ hasil   → {2, 3, 4, 7, 9}</pre>
     <span class="fn">printf</span>(<span class="st">"%c\\n"</span>, <span class="fn">toupper</span>(<span class="st">'b'</span>));       <span class="cm">// B</span>
     <span class="fn">printf</span>(<span class="st">"%d\\n"</span>, <span class="fn">strcmp</span>(<span class="st">"ab"</span>, <span class="st">"ab"</span>)); <span class="cm">// 0</span>
     <span class="kw">return</span> 0;
-}</pre>`}
+}</pre>`},
+
+ {t:"Bubble Sort — Lengkap Step by Step", k:["Bandingkan 2 elemen BERSEBELAHAN, tukar kalau salah urutan", "Versi depan: terbesar ke KANAN tiap pass · versi belakang: terkecil ke KIRI tiap pass", "n data → n − 1 pass · perbandingan n(n − 1)/2 · tukar maks n(n − 1)/2", "<code>&gt;</code> ascending · <code>&lt;</code> descending · flag: berhenti kalau 1 pass tanpa tukar"], h:`
+  <p><b>Bubble sort</b> = mengurutkan dengan membandingkan <b>dua elemen yang bersebelahan</b>, lalu <b>menukarnya</b> kalau urutannya salah. Diulang terus sampai tidak ada yang perlu ditukar. Namanya dari <b>gelembung udara</b>: yang besar pelan-pelan naik ke permukaan.</p>
+  <div class="note"><b>Rumus wajib hafal (n = jumlah data):</b><br>
+  • Jumlah pass = <b>n − 1</b> (5 data → 4 pass)<br>
+  • Jumlah perbandingan (tanpa flag) = <b>n(n − 1) / 2</b> (5 data → 4 + 3 + 2 + 1 = 10)<br>
+  • Jumlah tukar paling banyak = <b>n(n − 1) / 2</b> (data terbalik total), paling sedikit = <b>0</b> (data sudah urut)<br>
+  • Kompleksitas O(n²) · stabil · cocok untuk data sedikit</div>
+
+  <h4>Versi 1: dari depan (terbesar menggelembung ke KANAN)</h4>
+  <p>Ini versi yang paling sering dipakai. Data <span class="inlinecode">{6, 2, 9, 1, 5}</span>, ascending. Perhatikan: tiap pass, perbandingannya berkurang satu karena elemen paling kanan sudah fix.</p>
+<div class="tblwrap"><table class="tbl"><tr><th>Pass</th><th>Bandingkan</th><th>Tukar?</th><th>Isi array</th></tr>
+   <tr><td>1</td><td>a[0]=6 vs a[1]=2</td><td><b>Ya</b></td><td><b>2 6 9 1 5</b></td></tr>
+   <tr><td>1</td><td>a[1]=6 vs a[2]=9</td><td>Tidak</td><td>2 6 9 1 5</td></tr>
+   <tr><td>1</td><td>a[2]=9 vs a[3]=1</td><td><b>Ya</b></td><td><b>2 6 1 9 5</b></td></tr>
+   <tr><td>1</td><td>a[3]=9 vs a[4]=5</td><td><b>Ya</b></td><td><b>2 6 1 5 9</b></td></tr>
+   <tr><td>2</td><td>a[0]=2 vs a[1]=6</td><td>Tidak</td><td>2 6 1 5 9</td></tr>
+   <tr><td>2</td><td>a[1]=6 vs a[2]=1</td><td><b>Ya</b></td><td><b>2 1 6 5 9</b></td></tr>
+   <tr><td>2</td><td>a[2]=6 vs a[3]=5</td><td><b>Ya</b></td><td><b>2 1 5 6 9</b></td></tr>
+   <tr><td>3</td><td>a[0]=2 vs a[1]=1</td><td><b>Ya</b></td><td><b>1 2 5 6 9</b></td></tr>
+   <tr><td>3</td><td>a[1]=2 vs a[2]=5</td><td>Tidak</td><td>1 2 5 6 9</td></tr>
+   <tr><td>4</td><td>a[0]=1 vs a[1]=2</td><td>Tidak</td><td>1 2 5 6 9</td></tr>
+  </table></div>
+  <p>Hasil per pass: <b>pass 1 → 2 6 1 5 9</b> · <b>pass 2 → 2 1 5 6 9</b> · <b>pass 3 → 1 2 5 6 9</b> · pass 4 → 1 2 5 6 9. Total 10 perbandingan, <b>6 tukar</b>.</p>
+  <pre class="code"><span class="kw">for</span> (i = 0; i &lt; n - 1; i++)              <span class="cm">// pass 1 sampai n-1</span>
+    <span class="kw">for</span> (j = 0; j &lt; n - 1 - i; j++)      <span class="cm">// dari depan</span>
+        <span class="kw">if</span> (a[j] &gt; a[j + 1]) {           <span class="cm">// kiri lebih besar → tukar</span>
+            temp = a[j];
+            a[j] = a[j + 1];
+            a[j + 1] = temp;
+        }</pre>
+
+  <h4>Versi 2: dari belakang (terkecil menggelembung ke KIRI)</h4>
+  <p>Banyak modul kuliah memakai versi ini. Loop <span class="inlinecode">j</span> berjalan <b>mundur</b> dari indeks terakhir, jadi tiap pass elemen <b>terkecil</b> yang pindah ke depan. Data yang sama:</p>
+<div class="tblwrap"><table class="tbl"><tr><th>Pass</th><th>Bandingkan</th><th>Tukar?</th><th>Isi array</th></tr>
+   <tr><td>1</td><td>a[4]=5 vs a[3]=1</td><td>Tidak</td><td>6 2 9 1 5</td></tr>
+   <tr><td>1</td><td>a[3]=1 vs a[2]=9</td><td><b>Ya</b></td><td><b>6 2 1 9 5</b></td></tr>
+   <tr><td>1</td><td>a[2]=1 vs a[1]=2</td><td><b>Ya</b></td><td><b>6 1 2 9 5</b></td></tr>
+   <tr><td>1</td><td>a[1]=1 vs a[0]=6</td><td><b>Ya</b></td><td><b>1 6 2 9 5</b></td></tr>
+   <tr><td>2</td><td>a[4]=5 vs a[3]=9</td><td><b>Ya</b></td><td><b>1 6 2 5 9</b></td></tr>
+   <tr><td>2</td><td>a[3]=5 vs a[2]=2</td><td>Tidak</td><td>1 6 2 5 9</td></tr>
+   <tr><td>2</td><td>a[2]=2 vs a[1]=6</td><td><b>Ya</b></td><td><b>1 2 6 5 9</b></td></tr>
+   <tr><td>3</td><td>a[4]=9 vs a[3]=5</td><td>Tidak</td><td>1 2 6 5 9</td></tr>
+   <tr><td>3</td><td>a[3]=5 vs a[2]=6</td><td><b>Ya</b></td><td><b>1 2 5 6 9</b></td></tr>
+   <tr><td>4</td><td>a[4]=9 vs a[3]=6</td><td>Tidak</td><td>1 2 5 6 9</td></tr>
+  </table></div>
+  <p>Hasil per pass: <b>pass 1 → 1 6 2 9 5</b> · <b>pass 2 → 1 2 6 5 9</b> · <b>pass 3 → 1 2 5 6 9</b> · pass 4 → 1 2 5 6 9. Hasil akhir sama, tapi <b>isi array per pass beda</b> dengan versi 1. Makanya di soal, <b>lihat dulu arah loop j-nya</b>.</p>
+  <pre class="code"><span class="kw">for</span> (i = 0; i &lt; n - 1; i++)
+    <span class="kw">for</span> (j = n - 1; j &gt; i; j--)          <span class="cm">// dari belakang, mundur</span>
+        <span class="kw">if</span> (a[j] &lt; a[j - 1]) {           <span class="cm">// kanan lebih kecil → tukar</span>
+            temp = a[j];
+            a[j] = a[j - 1];
+            a[j - 1] = temp;
+        }</pre>
+
+  <h4>Variasi yang sering keluar</h4>
+  <div class="tblwrap"><table class="tbl"><tr><th>Variasi</th><th>Yang berubah di kode</th><th>Efeknya</th></tr>
+   <tr><td>Descending (besar → kecil)</td><td>Versi 1: <code>a[j] &lt; a[j+1]</code></td><td>Yang <b>terkecil</b> menggelembung ke kanan</td></tr>
+   <tr><td>Pakai flag</td><td><code>tukar = 0</code> tiap pass, <code>tukar = 1</code> kalau ada tukar, ulang selama <code>tukar</code></td><td>Berhenti lebih cepat kalau data sudah urut (best case 1 pass, O(n))</td></tr>
+   <tr><td>Loop luar dibatasi</td><td><code>i &lt; 2</code> (bukan <code>n - 1</code>)</td><td>Cuma 2 pass → array <b>belum tentu</b> urut</td></tr>
+   <tr><td>Hitung tukar</td><td><code>tukar++</code> di dalam if</td><td>Total tukar = banyaknya pasangan yang terbalik</td></tr>
+  </table></div>
+  <pre class="code"><span class="cm">// bubble sort dengan flag</span>
+<span class="kw">do</span> {
+    tukar = 0;
+    <span class="kw">for</span> (j = 0; j &lt; n - 1; j++)
+        <span class="kw">if</span> (a[j] &gt; a[j + 1]) {
+            temp = a[j]; a[j] = a[j + 1]; a[j + 1] = temp;
+            tukar = 1;                       <span class="cm">// ada pertukaran → ulang lagi</span>
+        }
+} <span class="kw">while</span> (tukar);</pre>
+
+  <h4>Trik ngerjain soal bubble sort dengan cepat</h4>
+  <ul>
+   <li><b>"Isi array setelah pass ke-k" (versi 1):</b> k elemen <b>terbesar</b> pasti sudah di kanan dan urut. Sisanya tinggal di-trace pass itu saja.</li>
+   <li><b>Versi 2:</b> k elemen <b>terkecil</b> pasti sudah di kiri.</li>
+   <li><b>"Berapa kali tukar":</b> hitung pasangan yang terbalik (angka besar di kiri angka kecil). Contoh {6, 2, 9, 1, 5}: (6,2) (6,1) (6,5) (2,1) (9,1) (9,5) = <b>6</b>.</li>
+   <li><b>"Berapa perbandingan":</b> (n − 1) + (n − 2) + … + 1 = n(n − 1)/2. Kalau loop dalam ditulis <code>j &lt; n - 1</code> (tanpa <code>- i</code>), perbandingannya (n − 1) × (n − 1).</li>
+   <li><b>Tukar 3 langkah</b> wajib pakai variabel bantu <code>temp</code>. Kalau langsung <code>a[j] = a[j+1]; a[j+1] = a[j];</code> → dua-duanya jadi sama (nilai hilang).</li>
+  </ul>
+  <div class="note">Latihan khusus bubble: Latihan → Bank Soal → ADS → topik <b>Bubble Sort</b>. Soal acaknya selalu beda tiap dibuka.</div>`}
 ];
 
 var ADS_BEDAH=[
@@ -1097,7 +1179,26 @@ var QUIZ_ADS=[
  {q:"Operasi menambah elemen ke stack disebut … dan mengambilnya disebut …",o:["push; pop", "enqueue; dequeue", "insert; delete di FRONT", "pop; push"],a:0,e:"Stack: push/pop di TOP. Queue: enqueue di REAR, dequeue di FRONT.",t:11},
  {q:"Fungsi untuk mengubah string \"123\" menjadi angka int 123 adalah…",o:["atoi() dari stdlib.h", "strlen() dari string.h", "toupper() dari ctype.h", "pow() dari math.h"],a:0,e:"atoi = ASCII to integer.",t:15},
  {q:"Fungsi untuk membandingkan dua string dengan benar di C adalah…",o:["strcmp(a, b) == 0", "a == b", "strcpy(a, b)", "strlen(a) == strlen(b)"],a:0,e:"a == b membandingkan ALAMAT array, bukan isinya. Pakai strcmp; hasil 0 artinya sama.",t:15},
- {q:"Pasangan fungsi dan header yang BENAR adalah…",o:["sqrt → math.h", "printf → stdlib.h", "strlen → stdio.h", "toupper → string.h"],a:0,e:"printf → stdio.h · strlen → string.h · toupper → ctype.h · sqrt → math.h.",t:15}
+ {q:"Pasangan fungsi dan header yang BENAR adalah…",o:["sqrt → math.h", "printf → stdlib.h", "strlen → stdio.h", "toupper → string.h"],a:0,e:"printf → stdio.h · strlen → string.h · toupper → ctype.h · sqrt → math.h.",t:15},
+
+ /* Bank soal tambahan remedial (kode sudah diuji compile + run) */
+ {q:"Output program berikut adalah…<pre class=\"code\">int a[5] = {6, 2, 9, 1, 5}, i, j, t;\nfor (i = 0; i &lt; 1; i++)\n    for (j = 0; j &lt; 4 - i; j++)\n        if (a[j] &gt; a[j + 1]) {\n            t = a[j]; a[j] = a[j + 1]; a[j + 1] = t;\n        }\nfor (i = 0; i &lt; 5; i++) printf(\"%d \", a[i]);</pre>",o:["2 6 1 5 9", "1 6 2 9 5", "2 1 5 6 9", "1 2 5 6 9"],a:0,e:"Cuma 1 pass (versi dari depan): 6↔2, 6–9 tetap, 9↔1, 9↔5 → 2 6 1 5 9. Angka terbesar (9) sudah di kanan.",t:16},
+ {q:"Output program berikut adalah…<pre class=\"code\">int a[5] = {6, 2, 9, 1, 5}, i, j, t;\nfor (i = 0; i &lt; 1; i++)\n    for (j = 4; j &gt; i; j--)\n        if (a[j] &lt; a[j - 1]) {\n            t = a[j]; a[j] = a[j - 1]; a[j - 1] = t;\n        }\nfor (i = 0; i &lt; 5; i++) printf(\"%d \", a[i]);</pre>",o:["1 6 2 9 5", "2 6 1 5 9", "1 2 6 5 9", "6 2 1 9 5"],a:0,e:"Versi dari BELAKANG (j mundur): yang terkecil (1) menggelembung ke depan: 1↔9, 1↔2, 1↔6 → 1 6 2 9 5.",t:16},
+ {q:"Output program berikut adalah…<pre class=\"code\">int a[6] = {5, 1, 6, 2, 4, 3}, i, j, t;\nfor (i = 0; i &lt; 2; i++)\n    for (j = 0; j &lt; 5 - i; j++)\n        if (a[j] &gt; a[j + 1]) {\n            t = a[j]; a[j] = a[j + 1]; a[j + 1] = t;\n        }\nfor (i = 0; i &lt; 6; i++) printf(\"%d \", a[i]);</pre>",o:["1 2 4 3 5 6", "1 5 2 4 3 6", "1 2 3 4 5 6", "1 2 5 4 3 6"],a:0,e:"Pass 1 → 1 5 2 4 3 6 (6 ke kanan). Pass 2 → 1 2 4 3 5 6 (5 ke kanan). Belum urut karena cuma 2 pass.",t:16},
+ {q:"Output program berikut adalah…<pre class=\"code\">int a[5] = {1, 2, 3, 4, 5}, i, j, t, c = 0;\nfor (i = 0; i &lt; 4; i++)\n    for (j = 0; j &lt; 4 - i; j++) {\n        c++;\n        if (a[j] &gt; a[j + 1]) {\n            t = a[j]; a[j] = a[j + 1]; a[j + 1] = t;\n        }\n    }\nprintf(\"%d\", c);</pre>",o:["10", "0", "4", "5"],a:0,e:"c dihitung di LUAR if → menghitung PERBANDINGAN, bukan tukar. Tanpa flag tetap 4 + 3 + 2 + 1 = 10, walau data sudah urut.",t:16},
+ {q:"Output program berikut adalah…<pre class=\"code\">int a[5] = {5, 4, 3, 2, 1}, i, j, t, c = 0;\nfor (i = 0; i &lt; 4; i++)\n    for (j = 0; j &lt; 4 - i; j++)\n        if (a[j] &gt; a[j + 1]) {\n            t = a[j]; a[j] = a[j + 1]; a[j + 1] = t;\n            c++;\n        }\nprintf(\"%d\", c);</pre>",o:["10", "4", "5", "20"],a:0,e:"Data terbalik total → setiap perbandingan pasti tukar. Tukar = n(n − 1)/2 = 5 × 4 / 2 = 10.",t:16},
+ {q:"Output program berikut adalah…<pre class=\"code\">int a[5] = {2, 9, 4, 7, 1}, i, j, t;\nfor (i = 0; i &lt; 4; i++)\n    for (j = 0; j &lt; 4 - i; j++)\n        if (a[j] &lt; a[j + 1]) {\n            t = a[j]; a[j] = a[j + 1]; a[j + 1] = t;\n        }\nprintf(\"%d %d %d\", a[0], a[2], a[4]);</pre>",o:["9 4 1", "1 4 9", "9 7 1", "2 4 1"],a:0,e:"Tanda < → DESCENDING: 9 7 4 2 1. a[0] = 9, a[2] = 4, a[4] = 1.",t:16},
+ {q:"Output program berikut adalah…<pre class=\"code\">int a[4] = {3, 1, 2, 4}, j, t, tukar, pass = 0;\ndo {\n    tukar = 0;\n    pass++;\n    for (j = 0; j &lt; 3; j++)\n        if (a[j] &gt; a[j + 1]) {\n            t = a[j]; a[j] = a[j + 1]; a[j + 1] = t;\n            tukar = 1;\n        }\n} while (tukar);\nprintf(\"%d\", pass);</pre>",o:["2", "3", "1", "4"],a:0,e:"Pass 1: 3↔1, 3↔2 → 1 2 3 4 (ada tukar, tukar = 1 → ulang). Pass 2: tidak ada tukar → tukar = 0 → berhenti. Total 2 pass.",t:16},
+ {q:"Output program berikut adalah…<pre class=\"code\">int a[5] = {4, 1, 3, 2, 5}, i, j, t;\nfor (i = 0; i &lt; 4; i++) {\n    for (j = 0; j &lt; 4 - i; j++)\n        if (a[j] &gt; a[j + 1]) {\n            t = a[j]; a[j] = a[j + 1]; a[j + 1] = t;\n        }\n    printf(\"%d \", a[4 - i]);\n}</pre>",o:["5 4 3 2", "4 3 2 1", "5 4 3 2 1", "2 3 4 5"],a:0,e:"Setelah tiap pass, elemen di posisi 4 − i sudah fix: pass 1 → a[4] = 5, pass 2 → a[3] = 4, pass 3 → a[2] = 3, pass 4 → a[1] = 2.",t:16},
+ {q:"Output program berikut adalah…<pre class=\"code\">int a[3] = {7, 3, 5}, j, t;\nfor (j = 0; j &lt; 2; j++)\n    if (a[j] &gt; a[j + 1]) {\n        a[j] = a[j + 1];\n        a[j + 1] = a[j];\n    }\nprintf(\"%d %d %d\", a[0], a[1], a[2]);</pre>",o:["3 3 5", "3 5 7", "3 7 5", "3 3 3"],a:0,e:"Tukar SALAH tanpa temp. j = 0: 7 > 3 → a[0] = 3, lalu a[1] = a[0] = 3 (nilai 7 hilang!). j = 1: 3 > 5? tidak. Hasil 3 3 5. Makanya tukar wajib pakai temp.",t:16},
+ {q:"Bubble sort membandingkan elemen yang…",o:["Bersebelahan (a[j] dan a[j+1])", "Paling kecil dengan paling besar", "Berjarak gap tertentu", "Ada di tengah array"],a:0,e:"Itu ciri khas bubble: selalu tetangga. Yang pakai jarak/gap itu shell sort.",t:16},
+ {q:"Pada bubble sort versi dari belakang (j mundur, a[j] < a[j−1] → tukar), setelah pass pertama yang pasti sudah di posisinya adalah…",o:["Elemen terkecil di indeks 0", "Elemen terbesar di indeks terakhir", "Elemen tengah", "Belum ada"],a:0,e:"Versi dari belakang membawa yang terkecil ke depan tiap pass.",t:16},
+ {q:"Bubble sort pada 8 data (tanpa flag) membutuhkan berapa pass?",o:["7", "8", "28", "64"],a:0,e:"n − 1 = 8 − 1 = 7 pass.",t:16},
+ {q:"Bubble sort pada 8 data (tanpa flag) melakukan berapa perbandingan?",o:["28", "7", "56", "64"],a:0,e:"n(n − 1)/2 = 8 × 7 / 2 = 28.",t:16},
+ {q:"Jumlah pertukaran bubble sort ascending pada data {3, 1, 2} adalah…",o:["2", "1", "3", "0"],a:0,e:"Pasangan terbalik: (3,1) dan (3,2) → 2 tukar. Trace: 3↔1 → 1 3 2, 3↔2 → 1 2 3.",t:16},
+ {q:"Kenapa pertukaran pada bubble sort butuh variabel temp?",o:["Supaya nilai lama a[j] tidak hilang tertimpa", "Supaya lebih cepat", "Karena wajib di semua loop", "Untuk menghitung jumlah pass"],a:0,e:"Tanpa temp, a[j] = a[j+1] menimpa nilai a[j] sebelum sempat dipindah ke a[j+1].",t:16},
+ {q:"Bubble sort ascending pada data yang sudah urut, versi dengan flag, berhenti setelah…",o:["1 pass", "0 pass", "n − 1 pass", "n pass"],a:0,e:"Pass pertama tidak ada tukar → flag tetap 0 → loop berhenti.",t:16},
+ {q:"Bubble sort termasuk algoritma sorting yang…",o:["Stabil dengan kompleksitas O(n²)", "Tidak stabil dengan O(n log n)", "Butuh data terurut", "Memakai pivot"],a:0,e:"Bubble hanya menukar kalau a[j] > a[j+1] (bukan ≥), jadi data bernilai sama tidak saling melompati → stabil.",t:16}
 ];
 
 /* ================= FLASHCARDS ================= */
@@ -1433,6 +1534,12 @@ var KISI_ADS=[
    "string.h: strlen, strcpy, strcat, strcmp",
    "math.h: pow, sqrt, ceil, floor, round, fabs (double)",
    "ctype.h: toupper, tolower, isdigit, isalpha · conio.h: getch, clrscr · time.h"
+ ]},
+ {t:"Bubble Sort (detail)", items:[
+   "Trace tiap perbandingan per pass",
+   "Versi dari depan (terbesar ke kanan) vs dari belakang (terkecil ke kiri)",
+   "Rumus pass, perbandingan, jumlah tukar",
+   "Descending, flag, loop luar dibatasi"
  ]}
 ];
 

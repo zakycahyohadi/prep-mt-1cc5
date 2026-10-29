@@ -689,21 +689,22 @@ const TRAPS=[
   "<b>Hub</b> = Physical (broadcast) · <b>Switch</b> = MAC · <b>Router</b> = IP."
 ];
 function renderRingkasan(el,sub){
-  sub=sub==="kisi"?"kisi":"kilat";
+  sub=sub==="kisi"||sub==="contekan"?sub:"kilat";
   el.innerHTML=`
   <div class="pagehead">
     <div class="eyebrow">Ringkasan</div>
-    <h1>${sub==="kisi"?"Kisi-kisi MT":"Ringkasan kilat."}</h1>
-    <p class="lead">${sub==="kisi"?"Semua sub-topik dipecah per materi. Tanya teman yang sudah MT, lalu <b>centang yang keluar</b>. Tombol “Salin” mengubahnya jadi teks siap kirim ke WhatsApp.":"Semua inti materi dan rumus dalam satu halaman. Baca 15 menit sebelum masuk ruangan. Bisa juga dicetak atau disimpan sebagai PDF."}</p>
+    <h1>${sub==="kisi"?"Kisi-kisi MT":sub==="contekan"?"Contekan IIT.":"Ringkasan kilat."}</h1>
+    <p class="lead">${sub==="contekan"?"Tinggal salin ke kertas. <b>Lembar 1</b> hitungan (paling banyak poin, tulis paling rapi), <b>lembar 2</b> hafalan. Ketuk bagian yang sudah kamu tulis biar dicoret.":sub==="kisi"?"Semua sub-topik dipecah per materi. Tanya teman yang sudah MT, lalu <b>centang yang keluar</b>. Tombol “Salin” mengubahnya jadi teks siap kirim ke WhatsApp.":"Semua inti materi dan rumus dalam satu halaman. Baca 15 menit sebelum masuk ruangan. Bisa juga dicetak atau disimpan sebagai PDF."}</p>
   </div>
   <div class="row noprint" style="margin-bottom:22px">
-    <nav class="seg"><a href="#ringkasan" ${sub==="kilat"?'aria-current="page"':""}>⚡ Ringkasan Kilat</a><a href="#ringkasan/kisi" ${sub==="kisi"?'aria-current="page"':""}>✅ Kisi-kisi</a></nav>
-    ${sub==="kilat"?`<button class="btn sm" id="rprint">🖨️ Cetak / PDF</button>`:""}
+    <nav class="seg"><a href="#ringkasan" ${sub==="kilat"?'aria-current="page"':""}>⚡ Ringkasan Kilat</a><a href="#ringkasan/contekan" ${sub==="contekan"?'aria-current="page"':""}>📝 Contekan</a><a href="#ringkasan/kisi" ${sub==="kisi"?'aria-current="page"':""}>✅ Kisi-kisi</a></nav>
+    ${sub!=="kisi"?`<button class="btn sm" id="rprint">🖨️ Cetak / PDF</button>`:""}
   </div>
   <div id="rbody"></div>`;
   const body=$("#rbody",el);
   if(sub==="kisi")return renderKisi(body);
   $("#rprint",el).addEventListener("click",()=>window.print());
+  if(sub==="contekan")return renderContekan(body);
   const sec=(subj)=>{const s=SUBJ[subj];return `<div class="sectiontitle"><div><div class="eyebrow">${s.short}</div><h2>${s.name}</h2></div></div>
     <div class="cheat">${s.topics.map((t,i)=>`<div class="card ${s.cls}"><h3><span class="num">${pad(i+1)}</span><a href="#l/${subj}-${i}">${esc(t.t)}</a></h3><ul>${t.k.map(k=>`<li>${k}</li>`).join("")}</ul></div>`).join("")}</div>`;};
   body.innerHTML=`
@@ -714,6 +715,23 @@ function renderRingkasan(el,sub){
   <div class="card s-bedah"><ul class="prose" style="margin:0;padding-left:20px">${TRAPS.map(t=>`<li>${t}</li>`).join("")}</ul></div>
   <div class="tips noprint" style="margin-top:24px;text-align:center"><b>Sudah baca semua?</b> <span class="muted">Tes sekali lagi lewat</span> <a href="#simulasi">Simulasi MT →</a></div>
   ${footer()}`;
+}
+function renderContekan(body){
+  const KC="mtprep-contekan";let done={};
+  try{done=JSON.parse(localStorage.getItem(KC)||"{}")||{};}catch(e){}
+  const sheet=n=>`<div class="sectiontitle"><div><div class="eyebrow">Lembar ${n}</div><h2>${n===1?"🔢 Hitungan":"🧠 Hafalan"}</h2></div></div>
+    <div class="cheat">${CONTEKAN_IIT.map((c,i)=>c.sheet!==n?"":`<div class="card s-iit ctk ${done[i]?"done":""}" data-i="${i}" role="button" tabindex="0" aria-pressed="${!!done[i]}"><h3><span class="num">${done[i]?"✓":pad(i+1)}</span>${c.h}</h3>${c.pre?`<pre class="work">${esc(c.pre)}</pre>`:`<ul>${c.items.map(x=>`<li>${x}</li>`).join("")}</ul>`}</div>`).join("")}</div>`;
+  body.innerHTML=`<div class="card kisibar s-iit noprint"><span><span class="pct" id="ccount">0</span> <span class="muted">/ ${CONTEKAN_IIT.length} bagian sudah ditulis</span></span><div class="bar"><i id="cfill"></i></div><button class="btn sm ghost" id="cclear">Reset</button></div>
+  ${sheet(1)}${sheet(2)}
+  <p class="muted noprint" style="text-align:center;margin-top:24px;font-size:14px">Tips: tabel biner–heksa bikin konversi tinggal lihat, nggak perlu ngitung. Habis nulis, latihan di <a href="#latihan">Hitung Acak</a>.</p>
+  ${footer()}`;
+  const upd=()=>{const n=Object.keys(done).length;$("#ccount",body).textContent=n;$("#cfill",body).style.width=(n/CONTEKAN_IIT.length*100)+"%";};
+  const toggle=c=>{const i=c.dataset.i;if(done[i])delete done[i];else done[i]=1;
+    c.classList.toggle("done",!!done[i]);c.setAttribute("aria-pressed",!!done[i]);$(".num",c).textContent=done[i]?"✓":pad(+i+1);
+    try{localStorage.setItem(KC,JSON.stringify(done));}catch(e){}upd();};
+  $$(".ctk",body).forEach(c=>{c.addEventListener("click",e=>{if(!e.target.closest("a"))toggle(c);});c.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();toggle(c);}});});
+  $("#cclear",body).addEventListener("click",()=>{done={};try{localStorage.removeItem(KC);}catch(e){}$$(".ctk",body).forEach(c=>{c.classList.remove("done");c.setAttribute("aria-pressed","false");$(".num",c).textContent=pad(+c.dataset.i+1);});upd();});
+  upd();
 }
 function renderKisi(body){
   const KK="mtprep-kisi";let checked={};

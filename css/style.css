@@ -548,6 +548,11 @@ input.txt.no{border-color:var(--bad);background:var(--bad-soft)}
 }
 
 /* ---------- print (ringkasan) ---------- */
+.ctk{cursor:pointer;transition:opacity .15s}
+.ctk ul{color:var(--fg)}
+.ctk pre.work{margin:0;font-size:13px;box-shadow:none}
+.ctk.done{opacity:.5}
+.ctk.done h3,.ctk.done li{text-decoration:line-through}
 @media print{
   header.top,nav.bottom,.noprint,.footer{display:none!important}
   body{background:#fff;color:#000;padding:0}

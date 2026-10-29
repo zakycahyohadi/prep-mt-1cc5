@@ -11,7 +11,7 @@ Website belajar **Modul Test (MT)** kelas 1CC5, step by step, untuk dua mata kul
 - ⏱️ **Simulasi MT**: format MT: 30 soal IIT (18 hitungan + 12 konsep), 30 soal ADS (18 kode/output + 12 konsep), atau Full 60 soal, pakai timer. **Bobot nilai beda per soal** (1–3 poin sesuai effort). Ada analisis skor per topik dan pembahasan.
 - 🧮 **Hitung Acak**: soal konversi basis, komplemen-2, penjumlahan biner, dan waktu unduh tanpa batas, lengkap dengan langkah-langkahnya.
 - 🃏 **Flashcard** dan 🔁 **Konverter** desimal ↔ biner ↔ oktal ↔ heksa.
-- ⚡ **Ringkasan Kilat**: semua inti dan rumus dalam satu halaman (bisa dicetak/PDF), plus ✅ **Kisi-kisi** yang bisa disalin ke WhatsApp.
+- ⚡ **Ringkasan Kilat**: semua inti dan rumus dalam satu halaman (bisa dicetak/PDF), 📝 **Contekan IIT** (2 lembar siap disalin ke kertas, ketuk untuk coret yang sudah ditulis), plus ✅ **Kisi-kisi** yang bisa disalin ke WhatsApp.
 - Mode gelap/terang, nyaman di HP (ada navigasi bawah). Progres tersimpan otomatis di browser.
 - Ringan untuk HP kentang (±66 KB gzip) dan **bisa offline** setelah sekali dibuka. Bisa dipasang lewat "Add to Home Screen".
 

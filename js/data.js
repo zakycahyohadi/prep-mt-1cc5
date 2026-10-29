@@ -924,3 +924,73 @@ var KISI_ADS=[
    "Queue vs Stack (FIFO vs LIFO)"
  ]}
 ];
+
+/* Contekan tulis tangan: isi untuk disalin ke kertas (IIT). sheet 1 = hitungan, 2 = hafalan */
+var CONTEKAN_IIT=[
+ {sheet:1,h:"Tabel wajib",pre:
+"Des Bin  Hex | Des Bin  Hex\n 0  0000  0  |  8  1000  8\n 1  0001  1  |  9  1001  9\n 2  0010  2  | 10  1010  A\n 3  0011  3  | 11  1011  B\n 4  0100  4  | 12  1100  C\n 5  0101  5  | 13  1101  D\n 6  0110  6  | 14  1110  E\n 7  0111  7  | 15  1111  F\n\n2⁰..2⁵: 1 2 4 8 16 32\n2⁶..2¹⁰: 64 128 256 512 1024"},
+ {sheet:1,h:"Konversi",items:[
+  "Desimal → basis lain: <b>bagi berulang</b> (÷2 / ÷8 / ÷16), sisa dibaca <b>bawah → atas</b>",
+  "Basis lain → desimal: digit × basis<sup>posisi</sup> (posisi dari kanan mulai 0). Contoh 1101₂ = 8+4+0+1 = 13",
+  "Biner → oktal: grup <b>3 bit</b> dari kanan",
+  "Biner → heksa: grup <b>4 bit</b> dari kanan (kurang → tambah 0 di kiri)",
+  "Oktal/heksa → biner: tiap digit dipecah jadi 3 / 4 bit",
+  "Oktal ↔ heksa: lewat biner dulu"]},
+ {sheet:1,h:"Aritmatika biner",items:[
+  "Tambah: 1+1 = 0 simpan 1 · 1+1+1 = 1 simpan 1",
+  "Kurang: 0−1 = 1 pinjam 1",
+  "<b>Komplemen-1</b> = balik semua bit",
+  "<b>Komplemen-2</b> = balik semua bit, lalu <b>+1</b>",
+  "MSB (bit paling kiri): 1 = negatif, 0 = positif",
+  "Komputer tidak mengurangi: 18−7 = 18 + (−7)",
+  "<b>BCD</b>: tiap digit desimal jadi 4 bit. Hasil <b>&gt; 9</b> atau ada carry → <b>tambah 0110</b>"]},
+ {sheet:1,h:"Data & unduh",items:[
+  "1 Byte = 8 bit · KB → MB → GB → TB → PB → EB, tiap naik <b>×1024</b>",
+  "<b>Waktu unduh = (Byte × 8) ÷ bps</b> · B besar = Byte, b kecil = bit · jangan lupa ×8!",
+  "<b>Efisiensi kompresi = 100% − (sesudah ÷ sebelum × 100%)</b>"]},
+ {sheet:1,h:"Logika",items:[
+  "n pernyataan → tabel kebenaran <b>2ⁿ baris</b>",
+  "AND (∧): benar hanya kalau dua-duanya B",
+  "OR (∨): salah hanya kalau dua-duanya S",
+  "<b>p→q salah HANYA saat B→S</b>",
+  "Konvers q→p · Invers ~p→~q · Kontraposisi ~q→~p (kontraposisi nilainya <b>sama</b> dengan p→q)"]},
+ {sheet:2,h:"Pengenalan TI",items:[
+  "<b>TI</b> = komputasi + jalur komunikasi pembawa data, suara, video (Williams &amp; Sawyer)",
+  "<b>Teknologi</b> = skill + algoritma (logika berpikir) + hardware",
+  "<b>Triad Senn</b>: Computers · Communications · Know-How (people, application, procedure)",
+  "<b>Fungsi TI</b>: Capture → Process → Generate → Store/Retrieve → Transmit",
+  "1946 ENIAC · 1969 ARPANET (4 node) · 1972 email &amp; TCP/IP · 1992 WWW (CERN)",
+  "Arsitektur informasi: apa disimpan, di mana, bagaimana dipindahkan · logis = bisnis, fisik = database/server",
+  "James Canton, 7 faktor: energi, pekerjaan, pangan, kesehatan, air, lingkungan, keamanan"]},
+ {sheet:2,h:"Evolusi komputer",items:[
+  "4 era: Komputerisasi (efisiensi) → TI (efektivitas) → SI (kompetitif) → Globalisasi",
+  "Gen 1 tabung hampa · 2 transistor · 3 IC (lahir OS &amp; minicomputer PDP-8) · 4 mikroprosesor (VLSI) · 5 biochip/AI",
+  "Analogi IBM: mobil 10.000 km/jam seharga $1"]},
+ {sheet:2,h:"Sistem komputer",items:[
+  "Hardware · Software · <b>Brainware</b> (Manajer EDP → Analis/Programmer → Operator/User)",
+  "<b>Arsitektur</b> = terlihat programmer · <b>Organisasi</b> = fisik, transparan",
+  "Stallings: Data Processing · Data Storage · Data Movement · Control",
+  "CPU: <b>CU</b> (pengendali) · <b>ALU</b> (aritmatika &amp; logika, pakai komplemen-2) · <b>Register</b> (tercepat)",
+  "Hukum Moore: transistor ×2 tiap ~18 bulan",
+  "Super (riset) &gt; Mainframe (bank) &gt; Mini (departemen) &gt; PC",
+  "Data: Analog (kontinu) · Digital (diskret) · Hybrid (mesin faks)",
+  "SBCDIC 6-bit (64) · ASCII 7/8-bit (256) · EBCDIC 8-bit (256)",
+  "Absolute value = nilai simbol · Position value = basis<sup>posisi</sup>"]},
+ {sheet:2,h:"Kompresi & transfer",items:[
+  "<b>Lossy</b> (tidak 100% sama): JPEG, MP3, MPEG",
+  "<b>Lossless</b> (sama persis): ZIP, RAR, PNG, GIF",
+  "GIF lossless 256 warna (8-bit) · PNG lossless + transparan · JPEG lossy 16,7 juta warna (24-bit)",
+  "Dialogue = real-time, delay ≤150 ms (video call) · Retrieval = tidak real-time",
+  "Interfacing: Protokol (aturan) · Handshaking (sinyal awal) · Bus (data, address, control)"]},
+ {sheet:2,h:"Jaringan",items:[
+  "PAN ruangan · LAN gedung · MAN kota · WAN negara",
+  "<b>Hub</b> = Physical (broadcast) · <b>Switch/Bridge</b> = Data Link (MAC) · <b>Router</b> = Network (IP)",
+  "NIC simpan MAC address · Modem = digital ↔ analog",
+  "Star tangguh (1 putus = cuma 1 mati) · Ring 1 putus = lumpuh · Mesh paling anti-gagal, boros kabel · Tree = hierarki",
+  "UTP ≤100 m · Fiber single-mode antar kota, multi-mode &lt;3 km",
+  "<b>Straight</b> = beda jenis · <b>Crossover</b> = sejenis (568A↔568B) · <b>Rollover</b> = konsol",
+  "Crimping: Stripping → Untwisting → Trimming → Crimping → Testing"]},
+ {sheet:2,h:"Interaksi Manusia–Mesin",items:[
+  "Uji Turing: A komputer · B manusia · C interogator · teks saja biar tak bias wujud fisik",
+  "Paradigma berbalik: dulu manusia menilai mesin, kini mesin (EdTech, gamifikasi) menilai manusia"]}
+];

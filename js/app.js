@@ -157,6 +157,7 @@ function renderHome(el){
       <p class="lead">Materi <b>Introduction to IT</b> dan <b>Algorithm &amp; Data Structure</b> dipecah jadi ${tot} langkah kecil. Tiap langkah: baca inti, pahami detailnya, lalu langsung tes. Penutupnya simulasi MT pakai timer.</p>
       <div class="cta">
         ${nx?`<a class="btn primary" href="#l/${nx.id}">${dn?"Lanjutkan belajar":"Mulai dari langkah 1"} →</a>`:`<a class="btn primary" href="#simulasi">Gas simulasi MT →</a>`}
+        <a class="btn" href="#coding">💻 Mode Coding</a>
         <a class="btn" href="#simulasi">⏱️ Simulasi MT</a>
         <a class="btn" href="#ringkasan">⚡ Ringkasan kilat</a>
       </div>
@@ -185,6 +186,7 @@ function renderHome(el){
 
   <div class="sectiontitle"><div><div class="eyebrow">Alat bantu</div><h2>Latihan bebas</h2></div></div>
   <div class="quick">
+    <a class="card qk s-ads" href="#coding"><span class="ic">💻</span><div><b>Mode Coding</b><span>${CODING_BAB.length} bab pola kode, ${CODING_TPL.length} template sorting/searching buat dihafal, latihan soal kode tanpa batas.</span></div></a>
     <a class="card qk s-acc" href="#latihan/soal"><span class="ic">✍️</span><div><b>Bank Soal</b><span>${ALLQ.length} soal + soal hitung &amp; kode acak tanpa batas.</span></div></a>
     <a class="card qk s-hitung" href="#latihan/hitung"><span class="ic">🧮</span><div><b>Hitung Acak</b><span>Soal konversi & komplemen-2 tanpa batas, lengkap dengan caranya.</span></div></a>
     <a class="card qk s-ads" href="#latihan/flash"><span class="ic">🃏</span><div><b>Flashcard</b><span>${FLASHCARDS.length} kartu hafalan cepat IIT + ADS.</span></div></a>
@@ -778,8 +780,218 @@ function renderKisi(body){
   upd();
 }
 
+/* ================= MODE CODING ================= */
+const CK="mtprep-coding";
+let CP={bab:{},tpl:{}};
+try{Object.assign(CP,JSON.parse(localStorage.getItem(CK)||"{}"));}catch(e){}
+const csave=()=>{try{localStorage.setItem(CK,JSON.stringify(CP));}catch(e){}};
+const C={bab:0,tpl:0,lvl:1,cat:"all",tp:null,queue:null,pos:0,ok:0,done:0,streak:0,best:0,wrongs:[],card:null,next:null};
+const NOT_CODE_GEN=["analogi","sortname","langkahsort","langkahsearch","langkahdasar"];
+const BLANK_GEN=["blank","bubcode","selcode","sintaks"];
+const isBlank=q=>BLANK_GEN.includes(q.gen)||/_{3,}|lengkapi|kosong/i.test(q.q);
+const CCATS={
+  all:["Semua soal kode",()=>true],
+  out:["🖨️ Tebak output",q=>!isBlank(q)],
+  blank:["✏️ Isi kode kosong",isBlank],
+  dasar:["🧱 Dasar C (operator, if, loop, array, fungsi)",q=>q.t>=1&&q.t<=9],
+  sort:["📶 Sorting & searching",q=>[10,11,12,13,16].includes(q.t)]
+};
+function codePool(){
+  const f=q=>CCATS[C.cat][1](q)&&(!C.tp||C.tp.includes(q.t));
+  const st=ALLQ.filter(q=>q.subj==="ads"&&q.kind==="code"&&f(q));
+  const gl=GENS.ads.filter(g=>!NOT_CODE_GEN.includes(g.id));
+  const gen=genMany(gl,gl.length*3).filter(f).slice(0,40);
+  return st.concat(gen);
+}
+function codeQueue(list){C.queue=shuffle(list||codePool());C.pos=0;C.ok=0;C.done=0;C.streak=0;C.wrongs=[];}
+
+function renderCoding(el,sub){
+  sub=["materi","template","latihan"].includes(sub)?sub:"materi";
+  el.innerHTML=`
+  <div class="pagehead">
+    <div class="eyebrow">Mode Coding · ADS</div>
+    <h1>Jago baca &amp; nulis kode C.</h1>
+    <p class="lead">Khusus soal kode: <b>tebak output</b>, <b>isi kode yang kosong</b>, dan <b>kode sorting/searching</b>. Urutannya: pahami pola di <b>Materi</b> → hafalkan kode wajib di <b>Hafal Template</b> → uji di <b>Latihan Kode</b>.</p>
+  </div>
+  <nav class="seg tabs3" aria-label="Mode coding">
+    <a href="#coding/materi" ${sub==="materi"?'aria-current="page"':""}><span class="si">📘</span>Materi Kode</a>
+    <a href="#coding/template" ${sub==="template"?'aria-current="page"':""}><span class="si">🧩</span>Hafal Template</a>
+    <a href="#coding/latihan" ${sub==="latihan"?'aria-current="page"':""}><span class="si">💻</span>Latihan Kode</a>
+  </nav>
+  <div id="cbody" class="s-ads" style="margin-top:20px"></div>`;
+  const body=$("#cbody",el);
+  ({materi:codeMateri,template:codeTemplate,latihan:codeLatihan})[sub](body);
+}
+
+function codeMateri(body){
+  const B=CODING_BAB[C.bab],bi=C.bab;
+  const nRead=CODING_BAB.filter((_,i)=>CP.bab[i]).length;
+  body.innerHTML=`
+  <div class="cgrid">
+    <aside class="card cside">
+      <h3>📘 ${CODING_BAB.length} bab pola kode <small class="faint">${nRead}/${CODING_BAB.length} selesai</small></h3>
+      <ol class="steps">${CODING_BAB.map((b,i)=>`<li><a href="#coding/materi" data-bab="${i}" class="${CP.bab[i]?"done":""} ${i===bi?"cur":""}"><span class="dot">${CP.bab[i]?"✓":i+1}</span><span class="st">${b.ic} ${esc(b.t)}<small>${b.ex.length} contoh kode</small></span></a></li>`).join("")}</ol>
+    </aside>
+    <article class="lmain">
+      <div class="mobilesteps"><select id="cbsel" aria-label="Pilih bab">${CODING_BAB.map((b,i)=>`<option value="${i}" ${i===bi?"selected":""}>${CP.bab[i]?"✓ ":""}${i+1}. ${esc(b.t)}</option>`).join("")}</select></div>
+      <div class="lprog"><span>Bab ${bi+1} dari ${CODING_BAB.length}</span><div class="bar"><i style="width:${(bi+1)/CODING_BAB.length*100}%"></i></div></div>
+      <h1>${B.ic} ${esc(B.t)}</h1>
+      <div class="keys"><h3>🎯 Inti yang wajib nempel</h3><ul>${B.keys.map(k=>`<li><span>${k}</span></li>`).join("")}</ul></div>
+      <div class="prose">${B.intro}</div>
+      <section class="lsec"><h2>🧪 Tebak dulu, baru buka</h2><p>Tutup jawabannya, trace pakai tabel di kertas, tulis tebakanmu, baru buka. Kalau salah, baca penjelasannya baris per baris.</p>
+        <div class="exlist">${B.ex.map((x,k)=>`<div class="ex">
+          <div class="exh"><span class="qn">CONTOH ${pad(k+1)}</span><span class="faint">Apa output kode ini?</span></div>
+          <pre class="code">${esc(x.c)}</pre>
+          <details class="try"><summary>Tebakanmu sudah ditulis?</summary><div class="ans"><div class="exo"><span>Output</span><pre class="work">${esc(x.o.replace(/\n$/,"\n⏎"))}</pre></div><p>${x.w}</p></div></details>
+        </div>`).join("")}</div>
+      </section>
+      <div class="note" style="margin-top:22px"><b>Lanjut uji diri:</b> soal kode khusus bab ini (soal acak + soal dosen). <a href="#coding/latihan" data-ctp="${bi}">💻 Latih bab ini →</a></div>
+      <div class="lnav">
+        ${bi>0?`<button class="btn" data-bab="${bi-1}">← <span class="t">${esc(CODING_BAB[bi-1].t)}</span></button>`:"<span></span>"}
+        <button class="btn primary" id="cbdone">✓ ${bi<CODING_BAB.length-1?"Paham, bab berikutnya":"Selesai, ke Hafal Template"} →</button>
+      </div>
+    </article>
+  </div>`;
+  const go=i=>{C.bab=i;codeMateri(body);window.scrollTo({top:0,behavior:reduceMotion?"auto":"smooth"});};
+  $$("[data-bab]",body).forEach(a=>a.addEventListener("click",e=>{e.preventDefault();go(+a.dataset.bab);}));
+  $("#cbsel",body).addEventListener("change",e=>go(+e.target.value));
+  $("#cbdone",body).addEventListener("click",()=>{
+    const first=!CP.bab[bi];CP.bab[bi]=1;csave();
+    if(first&&CODING_BAB.every((_,i)=>CP.bab[i])){confetti();toast("Semua bab kode selesai! 🎉");}else toast("Bab selesai ✓");
+    if(bi<CODING_BAB.length-1)go(bi+1);else location.hash="#coding/template";
+  });
+}
+
+/* Template: «jawaban||alternatif» di kode → kotak isian. Level menentukan berapa banyak yang dikosongkan. */
+const LVLS=[["Pemanasan",3],["Sedang",0.5],["Hafal total",1]];
+let TPLCUR=null;
+function tplParts(code){
+  const parts=[],re=/«([^»]*)»/g;let m,last=0;
+  while((m=re.exec(code))){parts.push({txt:code.slice(last,m.index)});parts.push({ans:m[1].split("||")});last=re.lastIndex;}
+  parts.push({txt:code.slice(last)});return parts;
+}
+const normCode=s=>s.replace(/\s+/g,"").replace(/[“”]/g,'"');
+function codeTemplate(body){
+  const T=CODING_TPL[C.tpl];
+  const parts=tplParts(T.code),blanks=parts.filter(p=>p.ans);
+  const L=LVLS[C.lvl],k=L[1]===1?blanks.length:L[1]<1?Math.max(1,Math.round(blanks.length*L[1])):Math.min(L[1],blanks.length);
+  const hide=new Set(shuffle(blanks.map((_,i)=>i)).slice(0,k));
+  let bi=0;
+  const html=parts.map(p=>{
+    if(p.txt!==undefined)return esc(p.txt);
+    const i=bi++;
+    if(!hide.has(i))return `<span class="given">${esc(p.ans[0])}</span>`;
+    return `<input class="blank" data-i="${i}" style="width:${Math.max(2,p.ans[0].length)+1}ch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" aria-label="Isian ${i+1}">`;
+  }).join("");
+  const nM=CODING_TPL.filter(t=>CP.tpl[t.id]).length;
+  body.innerHTML=`
+  <div class="focus">
+    <div class="toolbar">
+      <select id="ttpl" aria-label="Template">${CODING_TPL.map((t,i)=>`<option value="${i}">${CP.tpl[t.id]?"✓ ":""}${i+1}. ${esc(t.t)}</option>`).join("")}</select>
+      <nav class="seg">${LVLS.map((l,i)=>`<button type="button" data-lvl="${i}" aria-selected="${i===C.lvl}">${l[0]}</button>`).join("")}</nav>
+    </div>
+    <div class="fstats"><span class="fstat"><b>${k}</b>kotak kosong</span><span class="fstat"><b>${nM}/${CODING_TPL.length}</b>template hafal</span></div>
+    <div class="card tplcard">
+      <h3>🧩 ${esc(T.t)}</h3>
+      <p class="muted">Ketik isian yang hilang (spasi bebas). <kbd>Enter</kbd> = kotak berikutnya, di kotak terakhir = cek. Lulus di level <b>Hafal total</b> = template ditandai ✓.</p>
+      <pre class="code tplcode">${html}</pre>
+      <div class="row" style="margin-top:14px;flex-wrap:wrap;gap:8px">
+        <button class="btn primary" id="tcek">✓ Cek jawaban</button>
+        <button class="btn" id="tshow">👀 Lihat jawaban</button>
+        <button class="btn" id="tagain">↻ Acak kotak lagi</button>
+        <button class="btn ghost" id="tnext">Template berikutnya →</button>
+      </div>
+      <div id="tres" style="margin-top:12px"></div>
+    </div>
+    <div class="tips" style="margin-top:18px"><b>Cara hafal paling cepat:</b> <span class="muted">Pemanasan dulu sampai benar semua → naik ke Sedang → Hafal total. Lalu tulis ulang di kertas tanpa lihat. Ingat <i>alasan</i> tiap baris (misal: kenapa <code>n - 1 - i</code>? karena tiap pass 1 angka terbesar sudah di ujung).</span></div>
+  </div>`;
+  $("#ttpl",body).value=String(C.tpl);
+  $("#ttpl",body).addEventListener("change",e=>{C.tpl=+e.target.value;codeTemplate(body);});
+  $$("[data-lvl]",body).forEach(b=>b.addEventListener("click",()=>{C.lvl=+b.dataset.lvl;codeTemplate(body);}));
+  const ins=$$("input.blank",body),res=$("#tres",body);
+  const mark=(show)=>{
+    let ok=0;
+    ins.forEach(inp=>{
+      const p=blanks[+inp.dataset.i],good=p.ans.some(a=>normCode(a)===normCode(inp.value));
+      inp.classList.remove("ok","no");const nx=inp.nextElementSibling;if(nx&&nx.classList.contains("fix"))nx.remove();
+      if(show&&!good){inp.value=p.ans[0];inp.classList.add("shown");inp.style.width=Math.max(2,p.ans[0].length)+1+"ch";return;}
+      if(good){ok++;inp.classList.add("ok");}
+      else{inp.classList.add("no");inp.insertAdjacentHTML("afterend",`<span class="fix">${esc(p.ans[0])}</span>`);}
+    });
+    return ok;
+  };
+  $("#tcek",body).addEventListener("click",()=>{
+    const ok=mark(false),n=ins.length;
+    if(ok===n){
+      res.innerHTML=`<div class="exp ok"><b>✓ Sempurna ${ok}/${n}!</b> ${C.lvl<2?"Naik level biar makin nempel.":"Template ini sudah kamu hafal."}</div>`;
+      if(C.lvl===2&&!CP.tpl[T.id]){CP.tpl[T.id]=1;csave();confetti();toast("Template hafal ✓");}
+    }else res.innerHTML=`<div class="exp no"><b>${ok}/${n} benar.</b> Jawaban yang benar muncul di sebelah kotak merah. Baca ulang, lalu klik “Acak kotak lagi”.</div>`;
+  });
+  $("#tshow",body).addEventListener("click",()=>{mark(true);res.innerHTML=`<div class="exp no">Jawaban ditampilkan. Pelajari, lalu klik “Acak kotak lagi” dan coba tanpa lihat.</div>`;});
+  $("#tagain",body).addEventListener("click",()=>codeTemplate(body));
+  $("#tnext",body).addEventListener("click",()=>{C.tpl=(C.tpl+1)%CODING_TPL.length;codeTemplate(body);});
+  ins.forEach((inp,j)=>inp.addEventListener("keydown",e=>{
+    if(e.key!=="Enter")return;e.preventDefault();
+    if(j<ins.length-1)ins[j+1].focus();else $("#tcek",body).click();
+  }));
+  if(ins[0]&&matchMedia("(hover:hover)").matches)ins[0].focus({preventScroll:true});
+}
+
+function codeLatihan(body){
+  if(!C.queue)codeQueue();
+  const tpName=C.tp?CODING_BAB.find(b=>b.tp===C.tp):null;
+  body.innerHTML=`
+  <div class="focus">
+    <div class="toolbar">
+      <select id="ccat" aria-label="Jenis soal kode">${Object.entries(CCATS).map(([k,v])=>`<option value="${k}">${v[0]}</option>`).join("")}</select>
+      <select id="ctp" aria-label="Bab"><option value="-1">Semua bab</option>${CODING_BAB.map((b,i)=>`<option value="${i}">${i+1}. ${esc(b.t)}</option>`).join("")}</select>
+      <button class="btn sm ghost" id="cshuf">↻ Acak ulang</button>
+    </div>
+    <div class="fstats" id="cstats"></div>
+    <div class="bar" style="margin-bottom:16px"><i id="cfill"></i></div>
+    <div id="ccard"></div>
+  </div>`;
+  $("#ccat",body).value=C.cat;
+  $("#ctp",body).value=tpName?String(CODING_BAB.indexOf(tpName)):"-1";
+  $("#ccat",body).addEventListener("change",e=>{C.cat=e.target.value;codeQueue();codeLatihan(body);});
+  $("#ctp",body).addEventListener("change",e=>{const i=+e.target.value;C.tp=i<0?null:CODING_BAB[i].tp;codeQueue();codeLatihan(body);});
+  $("#cshuf",body).addEventListener("click",()=>{codeQueue();codeLatihan(body);});
+  codeStep(body);
+}
+function codeStats(body){
+  const n=C.queue.length;
+  $("#cstats",body).innerHTML=`<span class="fstat"><b>${Math.min(C.pos+1,n)}</b>/ ${n} soal</span><span class="fstat"><b>${C.ok}</b>benar</span><span class="fstat fire"><b>🔥 ${C.streak}</b>beruntun</span><span class="fstat"><b>${C.done?Math.round(C.ok/C.done*100):0}%</b>akurasi</span>`;
+  $("#cfill",body).style.width=(n?C.done/n*100:0)+"%";
+}
+function codeStep(body){
+  const box=$("#ccard",body);codeStats(body);C.card=null;
+  if(!C.queue.length){box.innerHTML=`<div class="card summary"><div class="big">🤔</div><h2>Tidak ada soal di filter ini</h2><p class="muted">Coba ganti jenis soal atau bab.</p></div>`;return;}
+  if(C.pos>=C.queue.length){
+    const pct=Math.round(C.ok/C.done*100);
+    box.innerHTML=`<div class="card summary"><div class="big">${pct}%</div><h2>${pct>=85?"Jago! Kode sudah kebaca 🔥":pct>=65?"Bagus, tinggal dipoles 💪":"Ulangi yang salah, pasti naik 📚"}</h2>
+      <p class="muted">${C.ok} dari ${C.done} benar · streak terbaik ${C.best}</p>
+      <div class="row">${C.wrongs.length?`<button class="btn primary" id="credo">Ulangi ${C.wrongs.length} yang salah</button>`:""}<button class="btn" id="cagain">Soal baru lagi</button></div></div>`;
+    if(C.ok===C.done)confetti();
+    const r=$("#credo",box);if(r)r.addEventListener("click",()=>{codeQueue(C.wrongs);codeStep(body);});
+    $("#cagain",box).addEventListener("click",()=>{codeQueue();codeStep(body);});
+    return;
+  }
+  const q=C.queue[C.pos];
+  const card=questionCard(q,{showSubj:true,showLink:true,onAnswer:ok=>{
+    C.done++;if(ok){C.ok++;C.streak++;C.best=Math.max(C.best,C.streak);if(C.streak%10===0){confetti();toast(`🔥 ${C.streak} benar beruntun!`);}}else{C.streak=0;C.wrongs.push(q);}
+    codeStats(body);nb.disabled=false;nb.focus({preventScroll:true});
+  }});
+  box.innerHTML="";box.appendChild(card);
+  const nav=document.createElement("div");nav.className="fnext";
+  nav.innerHTML=`<span class="kbd">Keyboard: <kbd>A</kbd>–<kbd>D</kbd> pilih · <kbd>Enter</kbd> lanjut</span><button class="btn primary" id="cnext" disabled>${C.pos+1>=C.queue.length?"Lihat hasil":"Lanjut"} →</button>`;
+  box.appendChild(nav);
+  const nb=$("#cnext",nav);
+  nb.addEventListener("click",()=>{C.pos++;codeStep(body);window.scrollTo({top:body.offsetTop-90,behavior:reduceMotion?"auto":"smooth"});});
+  C.card=card;C.next=nb;
+}
+
 /* ================= ROUTER ================= */
-const VIEWS=["home","belajar","lesson","latihan","simulasi","ringkasan"];
+const VIEWS=["home","belajar","lesson","latihan","coding","simulasi","ringkasan"];
 let curView=null;
 function route(){
   const h=decodeURIComponent(location.hash.slice(1))||"home";
@@ -787,13 +999,13 @@ function route(){
   let view=VIEWS.includes(v)&&v!=="lesson"?v:"home";
   if(v==="l"&&BYID[a])view="lesson";
   const el=$("#view-"+view);
-  ({home:()=>renderHome(el),belajar:()=>renderBelajar(el),lesson:()=>renderLesson(el,a),latihan:()=>renderLatihan(el,a),simulasi:()=>renderSim(el),ringkasan:()=>renderRingkasan(el,a)})[view]();
+  ({home:()=>renderHome(el),belajar:()=>renderBelajar(el),lesson:()=>renderLesson(el,a),latihan:()=>renderLatihan(el,a),coding:()=>renderCoding(el,a),simulasi:()=>renderSim(el),ringkasan:()=>renderRingkasan(el,a)})[view]();
   VIEWS.forEach(k=>{$("#view-"+k).hidden=k!==view;});
   if(curView!==view||view==="lesson"){el.classList.remove("view");void el.offsetWidth;el.classList.add("view");}
   curView=view;
   const nav=view==="lesson"?"belajar":view;
   $$("[data-nav]").forEach(x=>{if(x.dataset.nav===nav)x.setAttribute("aria-current","page");else x.removeAttribute("aria-current");});
-  const titles={home:"",belajar:"Jalur Belajar",lesson:view==="lesson"?BYID[a].title:"",latihan:"Latihan",simulasi:"Simulasi MT",ringkasan:"Ringkasan"};
+  const titles={home:"",belajar:"Jalur Belajar",lesson:view==="lesson"?BYID[a].title:"",latihan:"Latihan",coding:"Mode Coding",simulasi:"Simulasi MT",ringkasan:"Ringkasan"};
   document.title=(titles[view]?titles[view]+" · ":"")+"Prep MT 1CC5";
   updateTop();
   window.scrollTo(0,0);
@@ -806,6 +1018,8 @@ document.addEventListener("click",e=>{
   if(r){if(confirm("Reset semua progres belajar, riwayat soal, dan simulasi di browser ini?")){S=fresh();save();P.queue=null;route();toast("Progres direset.");}return;}
   const dr=e.target.closest("[data-drill]");
   if(dr){const[s,t]=dr.dataset.drill.split("-");P.subj=s;P.topic=+t;P.onlyWrong=false;newQueue();}
+  const ct=e.target.closest("[data-ctp]");
+  if(ct){C.tp=CODING_BAB[+ct.dataset.ctp].tp;C.cat="all";codeQueue();}
   const g=e.target.closest("[data-gen]");
   if(g&&GEN[g.dataset.gen]){G.type=g.dataset.gen;genNew();}
 });
@@ -820,6 +1034,9 @@ document.addEventListener("keydown",e=>{
   if(h.startsWith("latihan")&&(h==="latihan"||h==="latihan/soal")&&P.card){
     if(idx>=0&&!P.card.answered()){P.card.choose(idx);e.preventDefault();}
     else if((k==="enter"||k==="arrowright")&&P.card.answered()&&e.target!==P.next){P.next.click();e.preventDefault();}
+  }else if(h==="coding/latihan"&&C.card){
+    if(idx>=0&&!C.card.answered()){C.card.choose(idx);e.preventDefault();}
+    else if((k==="enter"||k==="arrowright")&&C.card.answered()&&e.target!==C.next){C.next.click();e.preventDefault();}
   }else if(h==="latihan/flash"&&F.go){
     if(k===" "){F.flip();e.preventDefault();}else if(k==="arrowright")F.go(1);else if(k==="arrowleft")F.go(-1);
   }else if(h.startsWith("simulasi")&&SIM&&!SIM.done&&SIM.go){
